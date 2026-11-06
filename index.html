@@ -284,7 +284,7 @@
         <div class="check-row" style="margin-bottom:12px"><span class="lbl" style="margin-right:6px">Your class's exam</span><span class="seg" id="enModeSeg"><button type="button" data-v="build">Make it here</button><button type="button" data-v="existing">It's already in Exam.net</button></span></div>
         <div id="enBuildWrap">
           <div class="field-grid">
-            <div class="field"><label for="enClassName">Its name in Exam.net</label><input id="enClassName" placeholder="e.g. Odyssey In-Class Essay"></div>
+            <div class="field"><label>Its name in Exam.net</label><span class="note" id="enClassNameShow"></span></div>
             <div class="field"><label>One for each class <span class="hint">(optional: adds “ - D” and so on to the name)</span></label><span class="seg" id="enPeriodSeg"></span></div>
           </div>
           <div class="qhead"><span class="lbl">The Exam</span><span class="note" id="qTally"></span></div>
@@ -303,7 +303,7 @@
           <div class="note" id="enClassBuilt" style="margin-top:10px"></div>
         </div>
         <div class="field-grid" style="margin-top:16px">
-          <div class="field" id="enSourceWrap"><label for="enSource">Your class's exam (its name or exam key)</label><input id="enSource" placeholder="e.g. Chapter 5 Test, or nXnuQL"></div>
+          <div class="field" id="enSourceWrap"><label for="enSource">Your class's exam in Exam.net <span class="hint">(if its name isn't the assessment's)</span></label><input id="enSource" placeholder="e.g. Chapter 5 Test, or nXnuQL"></div>
           <div class="field"><label for="enName">Testing Center copy's name</label><input id="enName" placeholder="e.g. Chapter 5 Test Testing Center"></div>
           <div class="field"><label for="enKey">Testing Center copy's exam key</label><input id="enKey" class="num" placeholder="Filled in when it's built"></div>
         </div>
@@ -370,7 +370,8 @@
     <div class="sheet-stack" id="previewStack"></div>
     <div class="bottom-actions">
       <button class="btn btn-primary btn-lg" id="printSheets" type="button">Print all cover sheets</button>
-      <button class="btn btn-lg" id="openForms" type="button">Fill the Testing Center form…</button>
+      <button class="btn btn-lg" id="openAllForms" type="button">Open and fill all Testing Center forms</button>
+      <button class="btn btn-sm" id="openForms" type="button" style="align-self:center">One at a time…</button>
     </div>
   </div>
 </div>
@@ -413,10 +414,11 @@
 <dialog class="modal" id="formBox">
   <div class="modal-inner">
     <div class="modal-head"><h2>Fill the Testing Center Form</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
-    <p class="note" style="margin:0">The Testing Center's form takes one sitting at a time. Each opens the real form in a new tab with its answers filled in: check it, attach the test on the last page and press Submit, then come back for the next. Submit each before opening the next (an unsent form's draft replaces the next one's answers; if a form shows the wrong student, click Clear form at its foot and open it again from here).</p>
+    <p class="note" style="margin:0">The Testing Center's form takes one sitting at a time, so each sitting gets its own tab of the real form with its answers filled in. In each tab: check it, attach the test on the last page and press Submit. Don't reload a tab before you submit it (Google can put another tab's answers back in); if one shows the wrong student, click Clear form at its foot and open it again from here.</p>
+    <div id="formPopNote" class="warnbox" hidden></div>
     <div id="formWarn" class="warnbox" hidden></div>
     <ul class="gf-list" id="formList"></ul>
-    <div class="modal-actions"><button class="btn" type="button" data-close>Done</button><button class="btn btn-primary" id="formNext" type="button">Open next</button></div>
+    <div class="modal-actions"><button class="btn" type="button" data-close>Done</button><button class="btn" id="formNext" type="button">Open next</button><button class="btn btn-primary" id="formAll" type="button">Open all</button></div>
   </div>
 </dialog>
 
@@ -944,7 +946,6 @@ function examNetBuilder() {
       .forEach(function (pair) { var p = pair.split(":"); $(p[0]).value = a[p[1]] == null ? "" : a[p[1]]; });
     ["enCopy", "enTimeLimit", "enCoTeacher"].forEach(function (k) { $(k).checked = !!a[k]; });
     document.querySelectorAll("#examPage input[data-k]").forEach(function (el) { el.checked = !!a[el.dataset.k]; });
-    $("enClassName").value = a.enClassName || "";
     drawExamNet(); drawEnMode(); drawQuestions(); drawEnSettings(); $("enBuilt").textContent = a.enKey ? "Exam key " + a.enKey : ""; drawSummaries(); drawStudents(); drawAttach(); drawPreview();
     show("exam");
   }
@@ -1245,7 +1246,7 @@ function examNetBuilder() {
       if (at) { var b = document.createElement("div"); b.className = "pill"; b.style.marginTop = "10px"; b.textContent = "+ " + at.pages.length + " test pages print after it"; st.appendChild(b); }
     }
     $("prevSheet").disabled = previewIndex <= 0; $("nextSheet").disabled = previewIndex >= n - 1;
-    $("printSheets").disabled = $("openForms").disabled = !n;
+    $("printSheets").disabled = $("openForms").disabled = $("openAllForms").disabled = !n;
     $("previewNote").textContent = n ? n + (n === 1 ? " cover sheet" : " cover sheets") + ", one for each Testing Center sitting." : "One for each Testing Center sitting.";
   }
   $("printSheets").addEventListener("click", function () {
@@ -1335,7 +1336,21 @@ function examNetBuilder() {
     var next = sits.find(function (x) { return !opened[sitKey(x)]; });
     $("formNext").disabled = !next; $("formNext").textContent = next ? "Open next: " + (next.s.name || "unnamed student") : "All opened";
   }
-  function openForm(x) { window.open(formUrl(x), "_blank", "noopener"); opened[sitKey(x)] = true; drawForms(); }
+  function openForm(x) { var w = window.open(formUrl(x), "_blank"); if (w) { try { w.opener = null; } catch (e) {} opened[sitKey(x)] = true; } drawForms(); return !!w; }
+  // Every sitting's form at once, each in its own tab. Chrome lets a page open
+  // only one tab per click until pop-ups are allowed for it, so say so.
+  function openAll() {
+    var sits = allSittings(cur), todo = sits.filter(function (x) { return !opened[sitKey(x)]; });
+    if (!todo.length) todo = sits;
+    var blocked = 0;
+    todo.forEach(function (x) { if (!openForm(x)) blocked++; });
+    drawForms(); $("formBox").open || $("formBox").showModal();
+    var n = $("formPopNote");
+    n.hidden = !blocked;
+    n.innerHTML = blocked ? "<strong>Chrome stopped " + blocked + (blocked === 1 ? " form" : " forms") + " opening.</strong> Click the blocked pop-up icon at the right of the address bar, choose <b>Always allow pop-ups</b> for this page, then click <b>Open all</b> again." : "";
+  }
+  $("openAllForms").addEventListener("click", openAll);
+  $("formAll").addEventListener("click", openAll);
   $("openForms").addEventListener("click", function () { drawForms(); $("formBox").showModal(); });
   $("formNext").addEventListener("click", function () { var x = allSittings(cur).find(function (y) { return !opened[sitKey(y)]; }); if (x) openForm(x); });
 
@@ -1563,7 +1578,10 @@ function examNetBuilder() {
     var a = cur, build = a.enMode === "build";
     $("enModeSeg").querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.dataset.v === a.enMode); });
     $("enBuildWrap").hidden = !build; $("enSourceWrap").hidden = build;
-    $("enName").placeholder = build ? (enClassNames(a)[0] || "e.g. Odyssey In-Class Essay") + " Testing Center" : "e.g. Chapter 5 Test Testing Center";
+    var nm = enClassNames(a);
+    $("enClassNameShow").textContent = nm.length ? nm.join(", ") : "The assessment's name, once it has one";
+    $("enSource").placeholder = (a.title || "").trim() ? a.title.trim() + " (or its exam key)" : "e.g. Chapter 5 Test, or nXnuQL";
+    $("enName").placeholder = tcName(Object.assign({}, a, { enName: "" })) || "e.g. Chapter 5 Test Testing Center";
     var seg = $("enPeriodSeg"); seg.innerHTML = "";
     "ABCDEFGH".split("").forEach(function (L) {
       var b = document.createElement("button"); b.type = "button"; b.textContent = L; b.className = a.enPeriods.indexOf(L) >= 0 ? "on" : ""; b.title = "Make one for " + L + " period";
@@ -1574,13 +1592,14 @@ function examNetBuilder() {
     $("enClassBuilt").innerHTML = built.length ? "In Exam.net: " + built.map(function (x) { return esc(x.name) + ' <span class="num">' + esc(x.key) + "</span>"; }).join(" · ") : "";
   }
   $("enModeSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || !cur) return; cur.enMode = b.dataset.v; save(); drawEnMode(); });
-  bind("enClassName", "enClassName");
-  $("enClassName").addEventListener("input", function () { if (cur && !cur.enNameSet) { cur.enName = ""; $("enName").value = ""; drawEnMode(); } });
+  // The assessment's name is its name in Exam.net (Jake, 2026-11-06).
+  $("aTitle").addEventListener("input", function () { if (!cur) return; if (!cur.enNameSet) { cur.enName = ""; $("enName").value = ""; } drawEnMode(); });
   function enClassNames(a) {
-    var base = (a.enClassName || a.title || "").trim(); if (!base) return [];
+    var base = (a.title || "").trim(); if (!base) return [];
     return a.enPeriods.length ? a.enPeriods.map(function (L) { return base + " - " + L; }) : [base];
   }
-  function tcName(a) { return a.enName.trim() || ((a.enMode === "build" ? enClassNames(a)[0] : a.enSource.trim()) ? (a.enMode === "build" ? (a.enClassName || a.title).trim() : a.enSource.trim()) + " Testing Center" : ""); }
+  function srcName(a) { return a.enSource.trim() || (a.title || "").trim(); }
+  function tcName(a) { return a.enName.trim() || ((a.enMode === "build" ? enClassNames(a)[0] : srcName(a)) ? (a.enMode === "build" ? a.title.trim() : srcName(a)) + " Testing Center" : ""); }
 
   // Exam.net's own form of each question (as its editor saves them).
   function rid() { var c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", o = ""; for (var i = 0; i < 10; i++) o += c.charAt(Math.floor(Math.random() * c.length)); return o; }
@@ -1617,7 +1636,7 @@ function examNetBuilder() {
   function examProblems(a) {
     var p = [];
     if (a.enMode === "build") {
-      if (!enClassNames(a).length) p.push("Give your class's exam a name.");
+      if (!enClassNames(a).length) p.push("Give the assessment a name (at the top): it's the exam's name in Exam.net.");
       if (!a.questions.length) p.push("Add the exam's prompt or questions.");
       a.questions.forEach(function (q, i) {
         if (q.type === "mc") {
@@ -1625,11 +1644,11 @@ function examNetBuilder() {
           else if (!q.options.some(function (o) { return o.text.trim() && o.correct; })) p.push("Question " + (i + 1) + " has no right answer marked.");
         }
       });
-    } else if (!a.enSource.trim()) p.push("Fill in your class's exam (its name or key).");
+    } else if (!srcName(a)) p.push("Give the assessment a name, or fill in your class's exam (its name or key).");
     return p;
   }
   function enSpec(a) {
-    var src = a.enSource.trim(), keyLike = /^[A-Za-z0-9]{6}$/.test(src);
+    var src = srcName(a), keyLike = /^[A-Za-z0-9]{6}$/.test(src);
     var spec = { v: BUILDER_V, from: location.origin, aid: a.id, name: tcName(a), share: "testingcenterud@horacemann.org", settings: enSetOf(a) };
     if (a.enMode === "build") spec.build = { names: enClassNames(a), questions: compileQuestions(a), settings: classSetOf(a) };
     else spec.source = { key: keyLike ? src : "", name: src };
@@ -1645,9 +1664,9 @@ function examNetBuilder() {
       "Click <b>Open Exam.net</b> (sign in if it asks).",
       "On that tab, click <b>Testing Center Builder</b> in your bookmarks bar.",
       build ? "Check what it says and click <b>Build it</b>: it makes your class's exam " + (names || "") + " with its questions and settings, then a copy for the Testing Center as “" + esc(name || "… Testing Center") + "” with testingcenterud@horacemann.org as its invigilator. The keys come back here."
-        : "Check what it found and click <b>Build it</b>: it copies " + (a.enSource.trim() ? "“" + esc(a.enSource.trim()) + "”" : "your class's exam") + " as “" + esc(name || "… Testing Center") + "”, sets its settings and gives testingcenterud@horacemann.org access as an invigilator. The key comes back here."
+        : "Check what it found and click <b>Build it</b>: it copies " + (srcName(a) ? "“" + esc(srcName(a)) + "”" : "your class's exam") + " as “" + esc(name || "… Testing Center") + "”, sets its settings and gives testingcenterud@horacemann.org access as an invigilator. The key comes back here."
     ].map(function (t, i) { return "<li><b>" + (i + 1) + "</b>&nbsp;" + t + "</li>"; }).join("");
-    $("enManual").innerHTML = ["Duplicate " + (build ? "your class's exam" : "“" + (a.enSource.trim() || "your class's exam") + "”") + " as “" + (name || "… Testing Center") + "”.", "In the copy's settings, turn the time limit off (and set the rest as above).", "Share it: give testingcenterud@horacemann.org Access.", "Copy the copy's exam key."]
+    $("enManual").innerHTML = ["Duplicate " + (build ? "your class's exam" : "“" + (srcName(a) || "your class's exam") + "”") + " as “" + (name || "… Testing Center") + "”.", "In the copy's settings, turn the time limit off (and set the rest as above).", "Share it: give testingcenterud@horacemann.org Access.", "Copy the copy's exam key."]
       .map(function (t, i) { return "<li><b>" + (i + 1) + "</b>&nbsp;" + esc(t) + "</li>"; }).join("");
     $("enKey2").value = a.enKey || "";
     var p = examProblems(a), r = $("enResult");
