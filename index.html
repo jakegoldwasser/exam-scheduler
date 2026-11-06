@@ -95,15 +95,20 @@
   .seg button + button { border-left: 1px solid var(--line-strong); }
   .seg button.on { background: var(--ink); color: var(--surface); }
 
-  .srow { display: grid; grid-template-columns: minmax(150px, 1.4fr) 70px 150px 92px minmax(180px, 1.6fr) 30px; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .srow { display: grid; grid-template-columns: minmax(140px, 1fr) 58px 150px 100px 24px; grid-template-areas: "name grade extra mk x" "cls cls sched sched x"; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg { grid-area: extra; justify-self: start; } .srow > .mk { grid-area: mk; } .srow > .x { grid-area: x; align-self: start; }
+  .srow > .cls { grid-area: cls; } .srow > .sched { grid-area: sched; }
   .srow.head { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding-top: 0; }
   .srow input, .srow select { padding: 5px 7px; font-size: 13px; }
-  .srow .sched { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+  .srow .sched { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .srow .sched .what { font-size: 12.5px; }
   .srow .sched .what.warn { color: var(--attn); font-weight: 600; }
+  .srow .cls { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-soft); }
+  .srow .cls input { width: 134px; padding: 5px 4px; }
+  .srow .cls select { width: 56px; padding: 5px 4px; }
   .srow .x { border: none; background: none; color: var(--ink-faint); font-size: 15px; }
   .srow .x:hover { color: #A3262F; }
-  @media (max-width: 760px) { .srow { grid-template-columns: 1fr 1fr; } .srow.head { display: none; } }
+  .field > .seg { align-self: flex-start; }
   .addrow { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 
   .previewcol h2 { font-size: 16px; margin-bottom: 4px; }
@@ -178,6 +183,27 @@
   .enrow { display: grid; grid-template-columns: 1fr 230px; gap: 10px; align-items: center; padding: 4px 0; }
   .enrow select, .enrow input { padding: 4px 7px; font-size: 13px; }
   .enrow.changed > span { font-weight: 600; }
+  .qhead { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 4px; }
+  .q { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 12px; margin-top: 10px; background: var(--surface); }
+  .q.info { background: #FAF9F5; }
+  .qtop { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .qtop .qn { font-weight: 700; color: var(--maroon); min-width: 18px; }
+  .qtop .qt { font-weight: 600; font-size: 13px; flex: 1; }
+  .qtop .xbtn { font-size: 15px; padding: 0 4px; }
+  .qtop .xbtn:disabled { opacity: .3; cursor: default; }
+  .rtbar { display: flex; gap: 2px; margin-bottom: 4px; }
+  .rtbar button { border: 1px solid transparent; background: none; border-radius: 4px; min-width: 26px; padding: 1px 6px; font-size: 13px; color: var(--ink-soft); }
+  .rtbar button:hover { border-color: var(--line-strong); color: var(--ink); }
+  .rt { min-height: 54px; border: 1px solid var(--line-strong); border-radius: 5px; padding: 7px 9px; background: #fff; font-family: "PT Serif", Georgia, serif; font-size: 14.5px; line-height: 1.5; outline: none; }
+  .rt:focus { border-color: var(--maroon); box-shadow: 0 0 0 2px var(--maroon-soft); }
+  .rt:empty::before { content: attr(data-ph); color: var(--ink-faint); }
+  .rt ul, .rt ol { margin: 4px 0; padding-left: 22px; }
+  .qopts { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 8px; font-size: 13px; }
+  .qopts input[type="number"] { width: 72px; padding: 4px 6px; }
+  .qopts textarea { width: 100%; padding: 5px 7px; font-size: 13px; }
+  .mcopt { display: grid; grid-template-columns: 22px 1fr auto 24px; gap: 8px; align-items: center; margin-top: 6px; }
+  .mcopt .let { font-weight: 600; color: var(--ink-soft); text-align: center; }
+  .mcopt input:not([type]) { padding: 5px 7px; }
   .enreq { display: flex; flex-wrap: wrap; gap: 4px 14px; grid-column: 1 / -1; }
   #printArea { display: none; }
   @media print {
@@ -239,15 +265,12 @@
         <div class="field"><label for="aSubject">Subject</label><input id="aSubject" placeholder="English"></div>
         <div class="field"><label for="aKind">Kind of assessment</label><select id="aKind"><option>Test</option><option>Quiz</option></select></div>
         <div class="field"><label for="aTime">Time given to class (minutes)</label><input id="aTime" type="number" min="1" inputmode="numeric"></div>
-        <div class="field"><label for="aDate">Class takes it on</label><input id="aDate" type="date"></div>
-        <div class="field"><label for="aPeriod">In period</label><select id="aPeriod"></select></div>
         <div class="field"><label for="aGrade">Grade</label><select id="aGrade"><option>9</option><option>10</option><option>11</option><option>12</option></select></div>
       </div>
     </div>
 
     <div class="panel">
       <div class="panel-title">Students <span class="sub" id="studentSummary"></span></div>
-      <div class="srow head"><span>Name</span><span>Grade</span><span>Extra time</span><span>Make-up</span><span>Testing Center time</span><span></span></div>
       <div id="studentRows"></div>
       <div class="addrow">
         <button class="btn btn-primary" id="addStudent" type="button">+ Add student</button>
@@ -258,8 +281,29 @@
     <div class="panel" id="examNetPanel">
       <div class="panel-title">Exam.net <span class="seg" id="enSeg"><button type="button" data-v="no">Not Exam.net</button><button type="button" data-v="yes">Exam.net</button></span></div>
       <div id="enBody">
-        <div class="field-grid">
-          <div class="field"><label for="enSource">Your class's exam (its name or exam key)</label><input id="enSource" placeholder="e.g. Chapter 5 Test, or nXnuQL"></div>
+        <div class="check-row" style="margin-bottom:12px"><span class="lbl" style="margin-right:6px">Your class's exam</span><span class="seg" id="enModeSeg"><button type="button" data-v="build">Make it here</button><button type="button" data-v="existing">It's already in Exam.net</button></span></div>
+        <div id="enBuildWrap">
+          <div class="field-grid">
+            <div class="field"><label for="enClassName">Its name in Exam.net</label><input id="enClassName" placeholder="e.g. Odyssey In-Class Essay"></div>
+            <div class="field"><label>One for each class <span class="hint">(optional: adds “ - D” and so on to the name)</span></label><span class="seg" id="enPeriodSeg"></span></div>
+          </div>
+          <div class="qhead"><span class="lbl">The Exam</span><span class="note" id="qTally"></span></div>
+          <div id="qList"></div>
+          <div class="addrow" id="qAdd">
+            <button class="btn btn-sm" type="button" data-q="info">+ Instructions or a passage</button>
+            <button class="btn btn-sm" type="button" data-q="free">+ Written answer</button>
+            <button class="btn btn-sm" type="button" data-q="short">+ Short answer</button>
+            <button class="btn btn-sm" type="button" data-q="mc">+ Multiple choice</button>
+          </div>
+          <details class="ensettings" id="classSetWrap">
+            <summary>Your Class's Exam Settings <span class="sub" id="classSetSummary"></span></summary>
+            <p class="note" style="margin:6px 0 4px">What isn't set here is Exam.net's default.</p>
+            <div id="classSettings"></div>
+          </details>
+          <div class="note" id="enClassBuilt" style="margin-top:10px"></div>
+        </div>
+        <div class="field-grid" style="margin-top:16px">
+          <div class="field" id="enSourceWrap"><label for="enSource">Your class's exam (its name or exam key)</label><input id="enSource" placeholder="e.g. Chapter 5 Test, or nXnuQL"></div>
           <div class="field"><label for="enName">Testing Center copy's name</label><input id="enName" placeholder="e.g. Chapter 5 Test TC"></div>
           <div class="field"><label for="enKey">Testing Center copy's exam key</label><input id="enKey" class="num" placeholder="Filled in when it's built"></div>
         </div>
@@ -356,6 +400,11 @@
     <div class="modal-head"><h2>Paste a List of Students</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
     <p class="note" style="margin:0 0 10px">One student a line. Add 1.5x or 2x after a name for extra time, and "make-up" for a make-up (e.g. <span class="num">Caspian C., 1.5x</span>). Students you've entered before keep their grade and extra time.</p>
     <textarea id="pasteText" rows="8"></textarea>
+    <div class="field-grid" style="margin-top:10px">
+      <div class="field"><label for="pasteDate">Their class takes it on</label><input id="pasteDate" type="date"></div>
+      <div class="field"><label for="pastePeriod">In period</label><select id="pastePeriod"></select></div>
+    </div>
+    <p class="hint" style="margin:6px 0 0">A line can name its own period instead (e.g. <span class="num">Ari B., 2x, D period</span>).</p>
     <div class="modal-actions"><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" id="pasteAdd" type="button">Add them</button></div>
   </div>
 </dialog>
@@ -405,10 +454,10 @@
    Exam Scheduler tab (postMessage). No comments of the // kind in here:
    it becomes a javascript: URL. */
 function examNetBuilder() {
-  var V = 1, OK_FROM = ["https://jakegoldwasser.github.io", "http://localhost:8765"];
+  var V = 2, OK_FROM = ["https://jakegoldwasser.github.io", "http://localhost:8765"];
   var old = document.getElementById("tcb-panel"); if (old) old.remove();
   var P = document.createElement("div"); P.id = "tcb-panel";
-  P.style.cssText = "position:fixed;top:14px;right:14px;z-index:2147483647;width:400px;max-height:92vh;overflow:auto;background:#fff;color:#1c1b19;border:2px solid #7A1F2E;border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.32);font:14px/1.45 -apple-system,Helvetica,Arial,sans-serif;padding:16px 18px;text-align:left";
+  P.style.cssText = "position:fixed;top:14px;right:14px;z-index:2147483647;width:410px;max-height:92vh;overflow:auto;background:#fff;color:#1c1b19;border:2px solid #7A1F2E;border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.32);font:14px/1.45 -apple-system,Helvetica,Arial,sans-serif;padding:16px 18px;text-align:left";
   document.body.appendChild(P);
   function el(tag, css, text) { var e = document.createElement(tag); if (css) e.style.cssText = css; if (text != null) e.textContent = text; return e; }
   function btn(text, primary, fn) { var b = el("button", "border-radius:999px;padding:8px 16px;font:600 13px -apple-system,Helvetica,sans-serif;cursor:pointer;margin:10px 8px 0 0;border:1px solid " + (primary ? "#7A1F2E;background:#7A1F2E;color:#fff" : "#C6BFA9;background:#fff;color:#1c1b19"), text); b.type = "button"; b.onclick = fn; return b; }
@@ -424,8 +473,9 @@ function examNetBuilder() {
   var xs = (document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1];
   var H = { "Accept": "application/json", "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" };
   if (xs) H["X-XSRF-TOKEN"] = decodeURIComponent(xs);
-  async function api(method, url, body) {
-    var r = await fetch(url, { method: method, headers: H, credentials: "same-origin", body: body == null ? undefined : JSON.stringify(body) });
+  async function api(method, url, body, bearer) {
+    var h = Object.assign({}, H); if (bearer && window.K$ && window.K$.builderJWT) h.Authorization = "Bearer " + window.K$.builderJWT;
+    var r = await fetch(url, { method: method, headers: h, credentials: "same-origin", body: body == null ? undefined : JSON.stringify(body) });
     var t = await r.text(), j = null; try { j = JSON.parse(t); } catch (e) {}
     if (!r.ok) throw new Error((j && j.message) || ("Exam.net said " + r.status));
     return j;
@@ -435,40 +485,59 @@ function examNetBuilder() {
     return { id: i.value, name: c[1] || "", key: (c[2] || "").split(/\s/)[0] };
   });
   function norm(s) { return String(s || "").trim().toLowerCase().replace(/\s+/g, " "); }
-  var src = rows.find(function (r) { return spec.source.key && r.key === spec.source.key; }) || rows.find(function (r) { return norm(r.name) === norm(spec.source.name); }) || rows.find(function (r) { return spec.source.key && r.key.toLowerCase() === spec.source.key.toLowerCase(); });
-  var existing = rows.find(function (r) { return norm(r.name) === norm(spec.name); });
-  if (existing && src && existing.id === src.id) existing = null;
-  say("Copy this exam for the Testing Center:", "font-weight:600");
-  var sel = el("select", "width:100%;padding:6px;border:1px solid #C6BFA9;border-radius:6px;font:14px -apple-system,Helvetica,sans-serif");
-  sel.appendChild(new Option(src ? "" : "Pick your class's exam…", ""));
-  rows.forEach(function (r) { var o = new Option(r.name + " · " + r.key, r.id); if (src && r.id === src.id) o.selected = true; sel.appendChild(o); });
-  if (!src) sel.options[0].selected = true;
-  P.appendChild(sel);
-  if (!src) say("Couldn't find “" + spec.source.name + "” in this list" + (rows.length ? ": pick it above." : ". Is it in a folder or the archive? Open that, then click TC Builder again."), "color:#93630F");
-  say("as “" + spec.name + "”, give testingcenterud@horacemann.org access as an invigilator, and set:", "");
-  var S = spec.settings || {}, LBL = { timeLimit: "Time limit", anonymous: "Anonymize", selfResume: "Self-resume", requirements: "Students give", writeArea: "Writing area", wordLimit: "Word limit", spell: "Spellcheck", fileUpload: "Uploads", audioRecording: "Audio recording", calculator: "Calculator", desmos: "Desmos", drawingArea: "Drawing area", formula: "Formula sheet", chem: "Periodic table", tts: "Text to speech", stt: "Speech to text", translate: "Translation", enThesaurus: "English synonyms", lockdown: "Lockdown", leave: "Leaving full screen", screenMonitoring: "Screen monitoring" };
-  var ul = el("ul", "margin:4px 0 0;padding-left:20px;font-size:13px");
-  Object.keys(S).forEach(function (k) { if (S[k] == null || (k === "leave" && S.lockdown && S.lockdown !== "medium")) return; ul.appendChild(el("li", "", (LBL[k] || k) + ": " + (Array.isArray(S[k]) ? S[k].join(", ") : k === "wordLimit" && !S[k] ? "none" : S[k]))); });
-  if (!ul.children.length) ul.appendChild(el("li", "", "nothing else: as in the class's exam"));
-  P.appendChild(ul);
+  function byName(n) { return rows.find(function (r) { return norm(r.name) === norm(n); }); }
+  var B = spec.build, sel = null, src = null;
+  var existing = byName(spec.name);
+  var classOld = B ? B.names.map(byName) : [];
+  if (B) {
+    var nq = B.questions.length;
+    say("Your class's exam" + (B.names.length > 1 ? "s" : "") + ":", "font-weight:600");
+    var ul0 = el("ul", "margin:2px 0 0;padding-left:20px;font-size:13px");
+    B.names.forEach(function (n, i) { ul0.appendChild(el("li", "", (classOld[i] ? "Update “" + n + "” (" + classOld[i].key + ")" : "Make “" + n + "”") + " with " + nq + (nq === 1 ? " question" : " questions"))); });
+    P.appendChild(ul0);
+    if (classOld.some(Boolean) || existing) say("Updating an exam replaces its questions with these. Don't update one students have already taken: their answers go with the old questions.", "font-size:12.5px;color:#93630F");
+  } else {
+    src = rows.find(function (r) { return spec.source.key && r.key === spec.source.key; }) || byName(spec.source.name) || rows.find(function (r) { return spec.source.key && r.key.toLowerCase() === spec.source.key.toLowerCase(); });
+    if (existing && src && existing.id === src.id) existing = null;
+    say("Copy this exam for the Testing Center:", "font-weight:600");
+    sel = el("select", "width:100%;padding:6px;border:1px solid #C6BFA9;border-radius:6px;font:14px -apple-system,Helvetica,sans-serif");
+    sel.appendChild(new Option(src ? "" : "Pick your class's exam…", ""));
+    rows.forEach(function (r) { var o = new Option(r.name + " · " + r.key, r.id); if (src && r.id === src.id) o.selected = true; sel.appendChild(o); });
+    if (!src) sel.options[0].selected = true;
+    P.appendChild(sel);
+    if (!src) say("Couldn't find “" + spec.source.name + "” in this list" + (rows.length ? ": pick it above." : ". Is it in a folder or the archive? Open that, then click TC Builder again."), "color:#93630F");
+  }
+  say((B ? "Then copy it for the Testing Center " : "") + "as “" + spec.name + "”, give testingcenterud@horacemann.org access as an invigilator, and set:", "margin-top:10px");
+  var LBL = { timeLimit: "Time limit", anonymous: "Anonymize", selfResume: "Self-resume", requirements: "Students give", writeArea: "Writing area", wordLimit: "Word limit", spell: "Spellcheck", fileUpload: "Uploads", audioRecording: "Audio recording", calculator: "Calculator", desmos: "Desmos", drawingArea: "Drawing area", formula: "Formula sheet", chem: "Periodic table", tts: "Text to speech", stt: "Speech to text", translate: "Translation", enThesaurus: "English synonyms", lockdown: "Lockdown", leave: "Leaving full screen", screenMonitoring: "Screen monitoring" };
+  function listSettings(S, none) {
+    var ul = el("ul", "margin:4px 0 0;padding-left:20px;font-size:13px");
+    var VAL = { on: "on", off: "off", high: "High (the Exam.net app)", medium: "Medium (browser)", disabled: "Disabled", "0": "none", en_US: "English", "1": "explain, unlocked at once", "2": "explain, wait 30 seconds", "3": "explain, wait 60 seconds", "4": "explain, wait 90 seconds", "5": "explain, the teacher unlocks", "10": "notify the teacher, don't lock" };
+    Object.keys(S).forEach(function (k) { if (S[k] == null || (k === "leave" && S.lockdown && S.lockdown !== "medium")) return; var v = S[k]; ul.appendChild(el("li", "", (LBL[k] || k) + ": " + (Array.isArray(v) ? v.join(", ") : k === "wordLimit" ? (v ? v + " words" : "none") : k === "timeLimit" && typeof v === "number" ? v + " minutes" : k === "formula" || k === "chem" ? (v === "0" ? "none" : v) : VAL[String(v)] || v))); });
+    if (!ul.children.length) ul.appendChild(el("li", "", none));
+    return ul;
+  }
+  var S = spec.settings || {};
+  P.appendChild(listSettings(S, "nothing else: as in the class's exam"));
+  if (B && Object.keys(B.settings || {}).some(function (k) { return B.settings[k] != null; })) { say("Your class's exam's settings:", "margin-top:10px"); P.appendChild(listSettings(B.settings, "")); }
   var mode = "new";
   if (existing) {
     say("There's already an exam called “" + spec.name + "” (" + existing.key + ").", "color:#93630F;margin-top:10px");
     var lab = el("label", "display:flex;gap:6px;align-items:center;font-size:13px"); var cb = el("input"); cb.type = "checkbox"; cb.checked = true; cb.onchange = function () { mode = cb.checked ? "update" : "new"; };
     lab.appendChild(cb); lab.appendChild(document.createTextNode(" Update that one instead of making another copy")); P.appendChild(lab); mode = "update";
   }
-  P.appendChild(btn("Build it", true, function () { if (!sel.value) { sel.focus(); return; } run(sel.value); }));
+  P.appendChild(btn("Build it", true, function () { if (sel && !sel.value) { sel.focus(); return; } run(sel ? sel.value : null); }));
   P.appendChild(btn("Cancel", false, function () { P.remove(); }));
   function on(v) { return v === "on"; }
   function who(x) { var t = x.teacher || {}; return { id: x.teacher_id || t.id || x.id, email: t.email || x.email || "" }; }
-  function apply(g) {
+  function apply(g, S, name) {
     var b = Object.assign({}, g); ["id", "created_at", "updated_at", "deleted_at", "archived_at", "lti", "readonly", "creation_source", "external_owner", "external_redirect_url"].forEach(function (k) { delete b[k]; });
     var res = {}, ex = {}; try { res = JSON.parse(b.resources || "{}"); } catch (e) {} try { ex = JSON.parse(b.extra_settings || "{}"); } catch (e) {}
     var want = {};
     function set(k, v) { b[k] = v; want[k] = v; }
     function setR(k, v) { res[k] = v; want["resources." + k] = v; }
-    b.name = spec.name; want.name = spec.name;
+    b.name = name; want.name = name;
     if (S.timeLimit === "off") set("automatic_submission_timer", null);
+    if (typeof S.timeLimit === "number") set("automatic_submission_timer", Math.max(120, S.timeLimit * 60));
     if (S.anonymous) set("anonymous", on(S.anonymous) ? 1 : 0);
     if (S.selfResume) set("student_self_resume", on(S.selfResume));
     if (Array.isArray(S.requirements) && S.requirements.length) set("requirements", JSON.stringify(S.requirements));
@@ -493,43 +562,103 @@ function examNetBuilder() {
     b.resources = JSON.stringify(res);
     return { body: b, want: want };
   }
-  function check(g, want) {
+  function check(g, want, who) {
     var res = {}, ex = {}; try { res = JSON.parse(g.resources || "{}"); } catch (e) {} try { ex = JSON.parse(g.extra_settings || "{}"); } catch (e) {}
     return Object.keys(want).filter(function (k) {
       var got = k.indexOf("resources.") === 0 ? res[k.slice(10)] : k === "extra.screenMonitoring.enabled" ? (ex.screenMonitoring || {}).enabled : g[k];
       return JSON.stringify(got) !== JSON.stringify(want[k]) && String(got) !== String(want[k]) && !(want[k] === 0 && got === false) && !(want[k] === 1 && got === true);
-    }).map(function (k) { return (LBL[k] || k.replace(/^resources\.|^extra\./, "")) + " didn't take"; });
+    }).map(function (k) { return who + ": " + (LBL[k] || k.replace(/^resources\.|^extra\./, "").replace("automatic_submission_timer", "time limit")) + " didn't take"; });
+  }
+  function contentOf(g) { try { return JSON.parse(g.content || "{}"); } catch (e) { return {}; } }
+  async function writeQuestions(bid) {
+    if (!bid) bid = (await api("POST", "/api/builder/exam", [], true)).id;
+    var list = [];
+    for (var i = 0; i < B.questions.length; i++) {
+      var q = await api("POST", "/api/builder/question", { subQuestions: [], gradingRules: {}, answers: {} }, true);
+      var v = await api("PUT", "/api/builder/question/" + q.id + "/version/" + q.version, B.questions[i], true);
+      list.push({ id: v.id || q.id, version: v.version || q.version });
+    }
+    await api("PUT", "/api/builder/exam/" + bid, list, true);
+    return bid;
+  }
+  function builderContent(bid) { return JSON.stringify({ choice: "builder", template: "", examBuilderId: bid, text: "", documentPDF: "", documentPages: [] }); }
+  var NEW_EXAM = {
+    allow_tts: 0, anonymous: 0, calculator: 0, backend_settings: "{\"allowedEmails\":[],\"accessibilityPresets\":[]}", formulaChosen: "0", ownFormulas: "[]", spellChecking: "0", translate: 0, writeArea: 0,
+    show_automarking_on_submission: false, for_practice: false, automatic_submission_timer: null, google_classroom_course_id: null, browserSecurityMode: "5", device_security: "ONLY_SEB",
+    requirements: "[\"firstName\",\"lastName\"]",
+    resources: JSON.stringify({ prepareStudentArea: false, geogebra: "", allowResumeByName: false, camera: false, fileUpload: false, keepFilesLocal: false, fileUploadPassword: "", thesaurus: false, enThesaurus: false, allThesaurus: false, aiThesaurus: false, speechToTextSettings: { enabled: false, locale: "" }, translationSettings: { singleWords: 0 }, dictionarySetting: "full", audioSettings: { usb: false, usbPassword: String(100000 + Math.floor(Math.random() * 900000)) }, desmos: false, teknikFormulas: false, physicsFormulas: false, chemistryFormulaChosen: "0", programming: false, drawingArea: false, audioRecording: false, external: [], externalAdvancedModeSetting: { enabled: false }, usePopups: false, backgroundImages: [], writeAreaSettings: { wordLimit: 0, limitEnforcement: "soft" }, audioFiles: [], audio: true, randomizeQuestions: false, randomizeQuestionsByDifficulty: false, coverAnswers: true, hidePointsForStudents: false }),
+    extra_settings: JSON.stringify({ limit: "seb", allowedClientVersions: "recommended", sebStartCheck: "soft", prohibitedProcesses: [], quitPassword: "", ignoreService: false, requireHighSecurityOn: [], screenMonitoring: { enabled: false } }),
+    teams_class_id: null, student_self_resume: false, student_exam_name_settings: "{\"choice\":\"examKey\",\"text\":\"\"}", custom_attribute_name: null, view_mode: "exam", discoverable: false
+  };
+  async function classExam(name, old, step, problems) {
+    if (old) {
+      step("Updating “" + name + "”…");
+      var g = await api("GET", "/api/exams/" + old.id), c = contentOf(g), body;
+      g.content = builderContent(await writeQuestions(c.choice === "builder" ? c.examBuilderId : 0));
+      var ap = apply(g, B.settings || {}, name);
+      await api("PUT", "/api/exams/" + old.id, ap.body);
+      problems.push.apply(problems, check(await api("GET", "/api/exams/" + old.id), ap.want, name));
+      return { id: old.id, name: name, key: g.examkey };
+    }
+    step("Making “" + name + "”…");
+    /* Exam.net only makes new exams in its own editor, so: copy any exam,
+       then put every setting back to Exam.net's defaults and the questions in. */
+    var base = rows.find(function (r) { return !/ TC$/.test(r.name); }) || rows[0];
+    if (!base) throw new Error("There's no exam in your list to start from. Make any exam in Exam.net, then try again");
+    var made = await api("POST", "/api/duplicate/" + base.id, { examName: name });
+    if (!made || !made.exam_id) throw new Error("Exam.net didn't say which exam it made");
+    var g1 = await api("GET", "/api/exams/" + made.exam_id), c1 = contentOf(g1);
+    var bid2 = await writeQuestions(c1.choice === "builder" ? c1.examBuilderId : 0);
+    var g2 = Object.assign({}, g1, NEW_EXAM, { content: builderContent(bid2) }), ap2 = apply(g2, B.settings || {}, name);
+    await api("PUT", "/api/exams/" + made.exam_id, ap2.body);
+    var g3 = await api("GET", "/api/exams/" + made.exam_id);
+    problems.push.apply(problems, check(g3, ap2.want, name));
+    var c3 = contentOf(g3), n3 = c3.examBuilderId ? ((await api("GET", "/api/builder/exam/" + c3.examBuilderId, null, true)).questions || []).length : 0;
+    if (n3 !== B.questions.length) problems.push("“" + name + "” has " + n3 + " of its " + B.questions.length + " questions");
+    return { id: made.exam_id, name: name, key: g3.examkey || made.examkey };
   }
   async function run(srcId) {
     head("TC Builder"); var log = el("ol", "margin:4px 0;padding-left:20px;font-size:13px"); P.appendChild(log);
     function step(t) { log.appendChild(el("li", "", t)); }
+    var problems = [], made = [], newContent = null;
     try {
+      if (B) {
+        for (var i = 0; i < B.names.length; i++) made.push(await classExam(B.names[i], classOld[i], step, problems));
+        srcId = made[0].id;
+      }
       var id;
-      if (mode === "update" && existing) { id = existing.id; step("Updating “" + spec.name + "”…"); }
-      else { step("Copying the exam…"); var d = await api("POST", "/api/duplicate/" + srcId, { examName: spec.name }); id = d.exam_id; if (!id) throw new Error("Exam.net didn't say which exam it made"); }
-      step("Setting its settings…");
-      var g = await api("GET", "/api/exams/" + id), ap = apply(g);
+      if (mode === "update" && existing) {
+        id = existing.id; step("Updating “" + spec.name + "”…");
+        if (B) {
+          var ge = await api("GET", "/api/exams/" + id), ce = contentOf(ge);
+          var tb = await writeQuestions(ce.choice === "builder" ? ce.examBuilderId : 0); if (tb !== ce.examBuilderId) newContent = builderContent(tb);
+        }
+      }
+      else { step("Copying it for the Testing Center…"); var d = await api("POST", "/api/duplicate/" + srcId, { examName: spec.name }); id = d.exam_id; if (!id) throw new Error("Exam.net didn't say which exam it made"); }
+      step("Setting the copy's settings…");
+      var g = await api("GET", "/api/exams/" + id); if (newContent) g.content = newContent;
+      var ap = apply(g, S, spec.name);
       await api("PUT", "/api/exams/" + id, ap.body);
       step("Giving the Testing Center access…");
       var sh = await api("GET", "/api/share/" + id), shared = (sh.shared || []).map(who).filter(function (x) { return x.id; });
       var tc = (sh.teachers || []).concat(shared).find(function (t) { return norm(t.email) === norm(spec.share); });
-      var problems = [];
       if (!tc) problems.push(spec.share + " wasn't in Exam.net's list of teachers: share it by email in Share");
       else if (!shared.some(function (x) { return x.id === tc.id; })) { shared.push({ id: tc.id, email: tc.email }); await api("POST", "/api/share/" + id, { shares: JSON.stringify(shared) }); }
       step("Checking…");
       var g2 = await api("GET", "/api/exams/" + id);
-      problems = problems.concat(check(g2, ap.want));
+      problems = problems.concat(check(g2, ap.want, "The copy"));
       var sh2 = await api("GET", "/api/share/" + id);
       if (tc && !(sh2.shared || []).map(who).some(function (x) { return norm(x.email) === norm(spec.share); })) problems.push("the Testing Center's access didn't take");
       head("Built");
-      say("“" + g2.name + "”", "font-weight:600");
+      made.forEach(function (x) { say("Your class's exam: “" + x.name + "” · " + x.key, "font-size:13px"); });
+      say("Testing Center copy: “" + g2.name + "”", "font-weight:600");
       var k = el("div", "font:600 30px ui-monospace,Menlo,monospace;letter-spacing:.06em;margin:6px 0;color:#7A1F2E", g2.examkey); P.appendChild(k);
-      say(problems.length ? "Check these in Exam.net: " + problems.join("; ") + "." : "All set: settings saved and the Testing Center has access.", problems.length ? "color:#93630F" : "color:#2F6B3A");
+      say(problems.length ? "Check these in Exam.net: " + problems.join("; ") + "." : "All set: questions and settings saved, and the Testing Center has access.", problems.length ? "color:#93630F" : "color:#2F6B3A");
       var sent = false;
-      if (window.opener && OK_FROM.indexOf(spec.from) >= 0) { try { window.opener.postMessage({ type: "tcbuild-done", aid: spec.aid, key: g2.examkey, name: g2.name, examId: id, problems: problems }, spec.from); sent = true; } catch (e) {} }
+      if (window.opener && OK_FROM.indexOf(spec.from) >= 0) { try { window.opener.postMessage({ type: "tcbuild-done", aid: spec.aid, key: g2.examkey, name: g2.name, examId: id, classExams: made.map(function (x) { return { name: x.name, key: x.key }; }), problems: problems }, spec.from); sent = true; } catch (e) {} }
       try { await navigator.clipboard.writeText(g2.examkey); } catch (e) {}
-      say(sent ? "The exam key is in the Exam Scheduler now (and copied)." : "The exam key is copied: paste it into the Exam Scheduler.", "font-size:13px;color:#57534A");
-      P.appendChild(btn("Open its settings", false, function () { location.href = "/admin/exam-creator/" + id + "/edit"; }));
+      say(sent ? "The keys are in the Exam Scheduler now (and the copy's is copied)." : "The copy's exam key is copied: paste it into the Exam Scheduler.", "font-size:13px;color:#57534A");
+      if (made.length) P.appendChild(btn("See your class's exam", false, function () { location.href = "/admin/exam-creator/" + made[0].id + "/edit"; }));
       P.appendChild(btn("Done", true, function () { history.replaceState(null, "", "/admin/exams"); location.reload(); }));
     } catch (e) {
       step("Stopped: " + e.message);
@@ -619,20 +748,30 @@ function examNetBuilder() {
       siTextbook: false, siNotes: false, siCalcGraphing: false, siCalcScientific: false, siCalc4fn: false, siScrap: false,
       siBluebook: false, siRefSheets: false, siLaptopWith: false, siLaptopWithout: false, siOtherOn: false, siOtherText: "", siAdditional: "",
       splitConsecutive: false, splitOnePage: false, splitNoReturn: false, splitOther: "",
-      examNet: true, enSource: "", enName: "", enKey: "", enCopy: false, enTimeLimit: false, enCoTeacher: false,
+      examNet: true, enMode: "build", enClassName: "", enPeriods: [], questions: [], enSource: "", enName: "", enKey: "", enCopy: false, enTimeLimit: false, enCoTeacher: false,
       students: []
     };
   }
-  function newStudent(a, name) {
-    var known = db.roster[(name || "").trim().toLowerCase()] || {};
-    return { id: makeId("s"), name: name || "", grade: known.grade || a.grade || "9", extra: known.extra || "1.5", makeup: false, withClass: true, parts: [], notes: "" };
+  // Each student's own class time: classes can take the same assessment at
+  // different times. A new student starts with the last one's.
+  function newStudent(a, name, date, period) {
+    var known = db.roster[(name || "").trim().toLowerCase()] || {}, last = a.students[a.students.length - 1] || {};
+    return { id: makeId("s"), name: name || "", grade: known.grade || a.grade || "9", extra: known.extra || "1.5", makeup: false, withClass: true, parts: [], notes: "",
+      classDate: date || last.classDate || a.classDate || todayISO(), classPeriod: period || known.period || last.classPeriod || a.classPeriod || "A" };
   }
+  // Older assessments kept one class time for everyone.
+  db.exams.forEach(function (a) {
+    a.students.forEach(function (s) { if (s.classDate == null) s.classDate = a.classDate || ""; if (!s.classPeriod) s.classPeriod = a.classPeriod || "A"; });
+    if (!a.enMode) a.enMode = a.enSource ? "existing" : "build";
+    if (!a.questions) a.questions = [];
+    if (!a.enPeriods) a.enPeriods = [];
+  });
   function mult(s) { return s.extra === "none" ? 1 : Number(s.extra) || 1; }
   // Minutes this student needs in all.
   function needMin(a, s) { return Math.round((Number(a.timeGiven) || 0) * mult(s)); }
   // Whether they take part of it with their class (not for a make-up).
-  function classPart(a, s) { return !s.makeup && s.withClass !== false && a.classDate && a.classPeriod; }
-  function classMin(a) { return Math.min(Number(a.timeGiven) || 0, periodOf(a.classPeriod).end - periodOf(a.classPeriod).start); }
+  function classPart(a, s) { return !s.makeup && s.withClass !== false && s.classDate && s.classPeriod; }
+  function classMin(a, s) { var p = periodOf(s.classPeriod); return Math.min(Number(a.timeGiven) || 0, p.end - p.start); }
   function partMin(p) {
     var per = periodOf(p.period), full = per.end - per.start;
     if (p.len === "first") return Math.min(HALF_MIN, full);
@@ -646,7 +785,7 @@ function examNetBuilder() {
     return periodName(p.period) + (p.len === "first" ? ", first half" : p.len === "second" ? ", second half" : p.len === "min" ? ", " + partMin(p) + " min" : "") + " · " + clock(st) + "–" + clock(st + partMin(p));
   }
   function needsTC(a, s) { return s.makeup || mult(s) > 1; }
-  function scheduledMin(a, s) { return (classPart(a, s) ? classMin(a) : 0) + s.parts.reduce(function (t, p) { return t + partMin(p); }, 0); }
+  function scheduledMin(a, s) { return (classPart(a, s) ? classMin(a, s) : 0) + s.parts.reduce(function (t, p) { return t + partMin(p); }, 0); }
   function sortedParts(s) { return s.parts.slice().sort(function (x, y) { return x.date < y.date ? -1 : x.date > y.date ? 1 : partStart(x) - partStart(y); }); }
 
   // Each Testing Center day is one cover sheet: its first part's period
@@ -654,7 +793,7 @@ function examNetBuilder() {
   // time already spent is everything before it (with the class, earlier days).
   function sittings(a, s) {
     if (!needsTC(a, s)) return [];
-    var parts = sortedParts(s), out = [], before = classPart(a, s) ? classMin(a) : 0;
+    var parts = sortedParts(s), out = [], before = classPart(a, s) ? classMin(a, s) : 0;
     if (!parts.length) return [{ a: a, s: s, date: "", parts: [], before: before, mins: Math.max(0, needMin(a, s) - before), unscheduled: true }];
     parts.forEach(function (p) {
       var last = out[out.length - 1];
@@ -667,7 +806,7 @@ function examNetBuilder() {
 
   function remember(s) {
     var k = s.name.trim().toLowerCase();
-    if (k) { db.roster[k] = { grade: s.grade, extra: s.extra }; }
+    if (k) { db.roster[k] = { grade: s.grade, extra: s.extra, period: s.classPeriod }; }
   }
 
   // ---------------------------------------------------------------
@@ -709,13 +848,19 @@ function examNetBuilder() {
   $("tExt").addEventListener("input", function () { db.teacher.ext = this.value.trim(); extAuto = false; save(); if (cur) drawPreview(); });
 
   // Home
-  function examWhen(a) { return a.classDate ? shortDay(a.classDate) + (a.classPeriod ? " · " + periodName(a.classPeriod) : "") : ""; }
+  function firstDate(a) { return a.students.map(function (s) { return s.classDate; }).filter(Boolean).sort()[0] || a.classDate || ""; }
+  function examWhen(a) {
+    var seen = {}, out = [];
+    a.students.forEach(function (s) { if (!s.classDate) return; var k = shortDay(s.classDate) + " · " + s.classPeriod; if (!seen[k]) { seen[k] = 1; out.push(k); } });
+    if (!out.length) return "";
+    return out.length > 2 ? out.length + " class times" : out.join(", ");
+  }
   function drawHome() {
     var box = $("cards"); box.innerHTML = "";
     var nb = document.createElement("button"); nb.type = "button"; nb.className = "card new"; nb.textContent = "+ New assessment";
     nb.addEventListener("click", function () { var a = newExam(); db.exams.unshift(a); save(); location.hash = "exam/" + a.id; setTimeout(function () { $("aTitle").focus(); }, 30); });
     box.appendChild(nb);
-    db.exams.slice().sort(function (x, y) { return (y.classDate || "").localeCompare(x.classDate || "") || y.created - x.created; }).forEach(function (a) {
+    db.exams.slice().sort(function (x, y) { return firstDate(y).localeCompare(firstDate(x)) || y.created - x.created; }).forEach(function (a) {
       var c = document.createElement("button"); c.type = "button"; c.className = "card";
       var sits = allSittings(a), uns = sits.filter(function (x) { return x.unscheduled; }).length;
       c.innerHTML = '<span class="t">' + esc(a.title || "Untitled assessment") + '</span><span class="m">' + esc([a.subject, examWhen(a)].filter(Boolean).join(" · ")) + '</span>' +
@@ -762,7 +907,8 @@ function examNetBuilder() {
   // One assessment
   // ---------------------------------------------------------------
   var periodOpts = PERIODS.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.id) + " · " + clock(p.start) + "</option>"; }).join("");
-  $("aPeriod").innerHTML = PERIODS.filter(function (p) { return p.id.length === 1; }).map(function (p) { return '<option value="' + p.id + '">' + p.id + " period (" + clock(p.start) + ")</option>"; }).join("");
+  var letterOpts = PERIODS.filter(function (p) { return p.id.length === 1; }).map(function (p) { return '<option value="' + p.id + '">' + p.id + "</option>"; }).join("");
+  $("pastePeriod").innerHTML = PERIODS.filter(function (p) { return p.id.length === 1; }).map(function (p) { return '<option value="' + p.id + '">' + p.id + " period (" + clock(p.start) + ")</option>"; }).join("");
 
   function bind(id, key, num) {
     var el = $(id);
@@ -773,29 +919,30 @@ function examNetBuilder() {
     });
   }
   bind("aTitle", "title"); bind("aSubject", "subject"); bind("aKind", "kind"); bind("aTime", "timeGiven", true);
-  bind("aDate", "classDate"); bind("aPeriod", "classPeriod"); bind("aGrade", "grade");
+  bind("aGrade", "grade");
   bind("enSource", "enSource"); bind("enName", "enName"); bind("enKey", "enKey");
   bind("siOtherText", "siOtherText"); bind("siAdditional", "siAdditional"); bind("splitOther", "splitOther");
   ["enCopy", "enTimeLimit", "enCoTeacher"].forEach(function (k) { $(k).addEventListener("change", function () { if (!cur) return; cur[k] = this.checked; save(); drawPreview(); }); });
   document.querySelectorAll("#examPage input[data-k]").forEach(function (el) {
     el.addEventListener("change", function () { if (!cur) return; cur[el.dataset.k] = el.checked; save(); drawSummaries(); drawPreview(); });
   });
-  $("enSource").addEventListener("input", function () { if (cur && !cur.enNameSet) { cur.enName = cur.enSource ? cur.enSource + " TC" : ""; $("enName").value = cur.enName; save(); } });
+  $("enSource").addEventListener("input", function () { if (cur && !cur.enNameSet) { cur.enName = ""; $("enName").value = ""; save(); } });
   $("enName").addEventListener("input", function () { if (cur) cur.enNameSet = !!this.value; });
   $("enSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || !cur) return; cur.examNet = b.dataset.v === "yes"; save(); drawExamNet(); drawPreview(); });
 
   function afterChange(key) {
-    if (key === "timeGiven" || key === "classDate" || key === "classPeriod") drawStudents();
+    if (key === "timeGiven") drawStudents();
     drawPreview();
   }
 
   function openExam(a) {
     cur = a; previewIndex = 0;
-    ["aTitle:title", "aSubject:subject", "aKind:kind", "aTime:timeGiven", "aDate:classDate", "aPeriod:classPeriod", "aGrade:grade", "enSource:enSource", "enName:enName", "enKey:enKey", "siOtherText:siOtherText", "siAdditional:siAdditional", "splitOther:splitOther"]
+    ["aTitle:title", "aSubject:subject", "aKind:kind", "aTime:timeGiven", "aGrade:grade", "enSource:enSource", "enName:enName", "enKey:enKey", "siOtherText:siOtherText", "siAdditional:siAdditional", "splitOther:splitOther"]
       .forEach(function (pair) { var p = pair.split(":"); $(p[0]).value = a[p[1]] == null ? "" : a[p[1]]; });
     ["enCopy", "enTimeLimit", "enCoTeacher"].forEach(function (k) { $(k).checked = !!a[k]; });
     document.querySelectorAll("#examPage input[data-k]").forEach(function (el) { el.checked = !!a[el.dataset.k]; });
-    drawExamNet(); drawEnSettings(); $("enBuilt").textContent = a.enKey ? "Exam key " + a.enKey : ""; drawSummaries(); drawStudents(); drawAttach(); drawPreview();
+    $("enClassName").value = a.enClassName || "";
+    drawExamNet(); drawEnMode(); drawQuestions(); drawEnSettings(); $("enBuilt").textContent = a.enKey ? "Exam key " + a.enKey : ""; drawSummaries(); drawStudents(); drawAttach(); drawPreview();
     show("exam");
   }
   $("aDelete").addEventListener("click", function () {
@@ -821,22 +968,28 @@ function examNetBuilder() {
     var box = $("studentRows"), a = cur; box.innerHTML = "";
     a.students.forEach(function (s) {
       var row = document.createElement("div"); row.className = "srow";
-      var name = document.createElement("input"); name.placeholder = "Student's name"; name.value = s.name;
+      var name = document.createElement("input"); name.className = "nm"; name.placeholder = "Student's name"; name.value = s.name;
       name.addEventListener("input", function () { s.name = name.value; save(); drawPreview(); });
       name.addEventListener("change", function () {
         var known = db.roster[s.name.trim().toLowerCase()];
-        if (known && !s.touched) { s.grade = known.grade || s.grade; s.extra = known.extra || s.extra; drawStudents(); }
+        if (known && !s.touched) { s.grade = known.grade || s.grade; s.extra = known.extra || s.extra; if (known.period && !s.periodSet) s.classPeriod = known.period; drawStudents(); }
         remember(s); save(); drawPreview();
       });
-      var grade = document.createElement("select"); grade.innerHTML = "<option>9</option><option>10</option><option>11</option><option>12</option>"; grade.value = s.grade;
+      var grade = document.createElement("select"); grade.className = "gr"; grade.title = "Grade"; grade.innerHTML = "<option>9</option><option>10</option><option>11</option><option>12</option>"; grade.value = s.grade;
       grade.addEventListener("change", function () { s.grade = grade.value; s.touched = true; remember(s); save(); drawPreview(); });
-      var extra = document.createElement("span"); extra.className = "seg";
+      var cls = document.createElement("div"); cls.className = "cls";
+      var cd = document.createElement("input"); cd.type = "date"; cd.value = s.classDate || ""; cd.title = "The day their class takes it";
+      var cp = document.createElement("select"); cp.innerHTML = letterOpts; cp.value = s.classPeriod || "A"; cp.title = "Their class's period";
+      cd.addEventListener("change", function () { s.classDate = cd.value; a.classDate = cd.value; save(); drawStudents(); drawPreview(); });
+      cp.addEventListener("change", function () { s.classPeriod = cp.value; s.periodSet = true; a.classPeriod = cp.value; remember(s); save(); drawStudents(); drawPreview(); });
+      cls.appendChild(document.createTextNode("Class takes it")); cls.appendChild(cd); cls.appendChild(cp);
+      var extra = document.createElement("span"); extra.className = "seg"; extra.title = "Extra time";
       [["none", "None"], ["1.5", "1.5×"], ["2", "2×"]].forEach(function (o) {
         var b = document.createElement("button"); b.type = "button"; b.textContent = o[1]; b.className = s.extra === o[0] ? "on" : "";
         b.addEventListener("click", function () { s.extra = o[0]; s.touched = true; remember(s); save(); drawStudents(); drawPreview(); });
         extra.appendChild(b);
       });
-      var mk = document.createElement("label"); mk.className = "check-row";
+      var mk = document.createElement("label"); mk.className = "check-row mk";
       var mkc = document.createElement("input"); mkc.type = "checkbox"; mkc.checked = s.makeup;
       mkc.addEventListener("change", function () { s.makeup = mkc.checked; save(); drawStudents(); drawPreview(); });
       mk.appendChild(mkc); mk.appendChild(document.createTextNode(" Make-up"));
@@ -854,7 +1007,7 @@ function examNetBuilder() {
       }
       var x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.title = "Remove this student from this assessment";
       x.addEventListener("click", function () { a.students = a.students.filter(function (y) { return y !== s; }); save(); drawStudents(); drawPreview(); });
-      [name, grade, extra, mk, sched, x].forEach(function (n) { row.appendChild(n); });
+      [name, grade, cls, extra, mk, sched, x].forEach(function (n) { row.appendChild(n); });
       box.appendChild(row);
     });
     var tc = a.students.filter(function (s) { return needsTC(a, s); }).length;
@@ -864,13 +1017,17 @@ function examNetBuilder() {
     cur.students.push(newStudent(cur, "")); save(); drawStudents(); drawPreview();
     var ins = $("studentRows").querySelectorAll("input:not([type])"); if (ins.length) ins[ins.length - 1].focus();
   });
-  $("pasteStudents").addEventListener("click", function () { $("pasteText").value = ""; $("pasteBox").showModal(); });
+  $("pasteStudents").addEventListener("click", function () {
+    var last = cur.students[cur.students.length - 1] || {};
+    $("pasteText").value = ""; $("pasteDate").value = last.classDate || cur.classDate || todayISO(); $("pastePeriod").value = last.classPeriod || cur.classPeriod || "A";
+    $("pasteBox").showModal();
+  });
   $("pasteAdd").addEventListener("click", function () {
     $("pasteText").value.split(/\n/).forEach(function (line) {
       line = line.trim(); if (!line) return;
-      var makeup = /make[- ]?up/i.test(line), m = line.match(/\b(1\.5|2)\s*[x×]/i), none = /\bno extra|\b1\s*[x×]/i.test(line);
-      var name = line.replace(/,?\s*(make[- ]?up|1\.5\s*[x×]|2\s*[x×]|1\s*[x×]|no extra( time)?)/ig, "").replace(/[,;\t]+$/, "").trim();
-      var s = newStudent(cur, name);
+      var makeup = /make[- ]?up/i.test(line), m = line.match(/\b(1\.5|2)\s*[x×]/i), none = /\bno extra|\b1\s*[x×]/i.test(line), pm = line.match(/\b([A-H])\s*period\b|\bperiod\s*([A-H])\b/i);
+      var name = line.replace(/,?\s*(make[- ]?up|1\.5\s*[x×]|2\s*[x×]|1\s*[x×]|no extra( time)?|\b[A-H]\s*period\b|\bperiod\s*[A-H]\b)/ig, "").replace(/[,;\t]+$/, "").trim();
+      var s = newStudent(cur, name, $("pasteDate").value, pm ? (pm[1] || pm[2]).toUpperCase() : $("pastePeriod").value);
       if (m) s.extra = m[1]; else if (none) s.extra = "none";
       s.makeup = makeup; remember(s); cur.students.push(s);
     });
@@ -888,7 +1045,7 @@ function examNetBuilder() {
     $("schedNotes").value = s.notes || "";
     drawSched(); $("schedBox").showModal();
   }
-  function edMin() { var a = cur, s = editing.s; return (!s.makeup && editing.withClass && a.classDate ? classMin(a) : 0) + editing.parts.reduce(function (t, p) { return t + partMin(p); }, 0); }
+  function edMin() { var a = cur, s = editing.s; return (!s.makeup && editing.withClass && s.classDate ? classMin(a, s) : 0) + editing.parts.reduce(function (t, p) { return t + partMin(p); }, 0); }
   // The rest of their time: right after the class (the next period that day),
   // or for a make-up the class's own period on the next school day.
   function fillRest() {
@@ -897,8 +1054,8 @@ function examNetBuilder() {
     var last = sortedParts({ parts: editing.parts }).pop(), date, idx;
     var letters = PERIODS.filter(function (p) { return p.id.length === 1; });
     if (last) { date = last.date; idx = letters.findIndex(function (p) { return p.id === last.period; }) + 1; }
-    else if (!s.makeup && editing.withClass && a.classDate) { date = a.classDate; idx = letters.findIndex(function (p) { return p.id === a.classPeriod; }) + 1; }
-    else { date = a.classDate && a.classDate >= todayISO() ? nextSchoolDay(a.classDate) : nextSchoolDay(todayISO()); idx = Math.max(0, letters.findIndex(function (p) { return p.id === a.classPeriod; })); }
+    else if (!s.makeup && editing.withClass && s.classDate) { date = s.classDate; idx = letters.findIndex(function (p) { return p.id === s.classPeriod; }) + 1; }
+    else { date = s.classDate && s.classDate >= todayISO() ? nextSchoolDay(s.classDate) : nextSchoolDay(todayISO()); idx = Math.max(0, letters.findIndex(function (p) { return p.id === s.classPeriod; })); }
     while (left > 0 && editing.parts.length < 8) {
       if (idx >= letters.length || idx < 0) { date = nextSchoolDay(date); idx = 0; }
       var per = letters[idx], full = per.end - per.start;
@@ -913,12 +1070,12 @@ function examNetBuilder() {
     var need = needMin(a, s);
     $("schedNeed").textContent = (s.makeup ? "A make-up" : "Extra time") + ": " + need + " minutes in all (" + (a.timeGiven || 0) + " min" + (mult(s) > 1 ? " × " + s.extra : "") + ").";
     var n = 0;
-    if (!s.makeup && a.classDate) {
+    if (!s.makeup && s.classDate) {
       var cp = document.createElement("div"); cp.className = "part classpart";
       var lab = document.createElement("label"); lab.className = "check-row";
       var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = editing.withClass;
       cb.addEventListener("change", function () { editing.withClass = cb.checked; drawSched(); });
-      lab.appendChild(cb); lab.appendChild(document.createTextNode(" With the class: " + shortDay(a.classDate) + " · " + periodName(a.classPeriod) + " (" + classMin(a) + " min)"));
+      lab.appendChild(cb); lab.appendChild(document.createTextNode(" With their class: " + shortDay(s.classDate) + " · " + periodName(s.classPeriod) + " (" + classMin(a, s) + " min)"));
       cp.innerHTML = '<span class="pn">' + (editing.withClass ? ++n : "") + "</span>";
       cp.appendChild(lab); cp.appendChild(document.createElement("span"));
       box.appendChild(cp);
@@ -954,7 +1111,7 @@ function examNetBuilder() {
   function whenText(p) {
     var h = holiday(p.date), wd = p.date ? dateOf(p.date).getDay() : 1;
     return partLabel(p) + (h ? " · ⚠ " + h + ": school is likely closed" : (wd === 0 || wd === 6) ? " · ⚠ a weekend" : "") +
-      (p.date && p.date === cur.classDate && p.period === cur.classPeriod && !editing.s.makeup ? " · ⚠ that's the class's own time" : "");
+      (p.date && p.date === editing.s.classDate && p.period === editing.s.classPeriod && !editing.s.makeup ? " · ⚠ that's their class's own time" : "");
   }
   function drawTally() {
     var need = needMin(cur, editing.s), have = edMin(), t = $("schedTally");
@@ -964,7 +1121,7 @@ function examNetBuilder() {
   }
   $("schedAdd").addEventListener("click", function () {
     var last = sortedParts({ parts: editing.parts }).pop();
-    editing.parts.push({ id: makeId("p"), date: last ? nextSchoolDay(last.date) : (cur.classDate || todayISO()), period: last ? last.period : cur.classPeriod || "A", len: "whole", mins: "" });
+    editing.parts.push({ id: makeId("p"), date: last ? nextSchoolDay(last.date) : (editing.s.classDate || todayISO()), period: last ? last.period : editing.s.classPeriod || "A", len: "whole", mins: "" });
     drawSched();
   });
   $("schedFill").addEventListener("click", function () { fillRest(); drawSched(); });
@@ -1019,7 +1176,7 @@ function examNetBuilder() {
     if (x.s.notes) bits.push(x.s.notes);
     return bits.join(". ");
   }
-  function sameDayMakeup(x) { return x.s.makeup && x.date && x.date === x.a.classDate; }
+  function sameDayMakeup(x) { return x.s.makeup && x.date && x.date === x.s.classDate; }
   function buildSheet(x) {
     var a = x.a, s = x.s, t = db.teacher;
     var checks = SPECIAL.filter(function (c) { return a[c[0]]; }).map(function (c) { return "☑ " + c[1]; });
@@ -1048,7 +1205,7 @@ function examNetBuilder() {
       (a.siAdditional.trim() ? sfRow("Additional", esc(a.siAdditional)) : "") +
       '<div class="sf-section-label" style="margin-top:4px;">Exam.net assessment</div>' +
       sfRow("Is this an Exam.net assessment?", a.examNet ? "Yes" : "No") +
-      (a.examNet ? sfRow("Exam name", esc(a.enName) || "&nbsp;") + sfRow("Exam key", esc(a.enKey) || "&nbsp;") : "") +
+      (a.examNet ? sfRow("Exam name", esc(tcName(a)) || "&nbsp;") + sfRow("Exam key", esc(a.enKey) || "&nbsp;") : "") +
       '<hr class="sf-rule"><div class="sf-section-label">Split instructions</div>' +
       '<div class="sf-checks">' + splits.map(function (c) { return "<span>" + esc(c) + "</span>"; }).join("") + "</div>" +
       sfRow("Other split instructions", esc(a.splitOther) || "&nbsp;") +
@@ -1115,7 +1272,7 @@ function examNetBuilder() {
     add(GFORM.timeSpent, x.before);
     add(GFORM.examNet, a.examNet ? "Yes" : "No");
     if (a.examNet) {
-      add(GFORM.examName, a.enName); add(GFORM.examKey, a.enKey);
+      add(GFORM.examName, tcName(a)); add(GFORM.examKey, a.enKey);
       if (a.enCopy) add(GFORM.examNetChecklist, "Create a new copy of the exam for the Testing Center?");
       if (a.enTimeLimit) add(GFORM.examNetChecklist, "Make sure the time limit is turned off?");
       if (a.enCoTeacher) add(GFORM.examNetChecklist, "Assign testingcenterud@horacemann.org as a co-teacher of your Testing Center exam?");
@@ -1134,7 +1291,7 @@ function examNetBuilder() {
     if (!db.teacher.ext) w.push("Your extension (top right) is blank. The form requires it.");
     if (!a.subject.trim()) w.push("Subject is blank. The form requires it.");
     if (!String(a.timeGiven).trim()) w.push("Time given to class is blank. The form requires it.");
-    if (a.examNet && (!a.enName.trim() || !a.enKey.trim())) w.push("The Exam.net copy's name or exam key is blank. The form requires both.");
+    if (a.examNet && (!tcName(a) || !a.enKey.trim())) w.push("The Exam.net copy's name or exam key is blank. The form requires both.");
     if (a.examNet && !(a.enCopy && a.enTimeLimit && a.enCoTeacher)) w.push("The form requires all three Exam.net boxes to be checked.");
     if (allSittings(a).some(function (x) { return x.unscheduled; })) w.push("Some students aren't scheduled yet, so their forms have no date.");
     if (a.students.some(function (s) { return needsTC(a, s) && !s.name.trim(); })) w.push("A student has no name.");
@@ -1197,83 +1354,295 @@ function examNetBuilder() {
       ["screenMonitoring", "Screen monitoring", ONOFF]]]
   ];
   var REQS = [["firstName", "First name"], ["lastName", "Last name"], ["email", "Email"], ["class", "Class"], ["teacher", "Teacher name"], ["phone", "Phone number"], ["studentId", "Student number"]];
-  var BUILDER_V = 1;
+  var BUILDER_V = 2;
   function enSetOf(a) { if (!a.enSet) a.enSet = Object.assign({ timeLimit: "off" }, db.enDefaults || {}); return a.enSet; }
-  function drawEnSettings() {
-    var set = enSetOf(cur), box = $("enSettings"); box.innerHTML = "";
+  function classSetOf(a) { if (!a.classSet) a.classSet = Object.assign({}, db.classDefaults || {}); return a.classSet; }
+  // Draws ENSET into box. kind "tc": blank = as in the class's exam;
+  // kind "class": blank = Exam.net's default, and the time limit is minutes.
+  function drawSettingsInto(box, set, kind, after) {
+    var blank = kind === "tc" ? "Same as your class's exam" : "Exam.net's default";
+    box.innerHTML = "";
+    function changed() { save(); drawSettingsInto(box, set, kind, after); }
     ENSET.forEach(function (g) {
       var gd = document.createElement("div"); gd.className = "engroup"; gd.innerHTML = "<h4>" + esc(g[0]) + "</h4>";
       g[1].forEach(function (f) {
         var k = f[0], row = document.createElement("div"); row.className = "enrow" + (set[k] != null ? " changed" : "");
         if (k === "leave" && set.lockdown && set.lockdown !== "medium") return;
-        row.appendChild(Object.assign(document.createElement("span"), { textContent: f[1] }));
-        if (f[2] === "req") {
-          var sel = document.createElement("select"); sel.innerHTML = '<option value="">Same as your class\'s exam</option><option value="set">These:</option>';
+        var type = kind === "class" && k === "timeLimit" ? "min" : f[2];
+        row.appendChild(Object.assign(document.createElement("span"), { textContent: f[1] + (type === "min" ? " (minutes)" : "") }));
+        if (type === "req") {
+          var sel = document.createElement("select"); sel.innerHTML = '<option value="">' + blank + '</option><option value="set">These:</option>';
           sel.value = set.requirements ? "set" : "";
-          sel.addEventListener("change", function () { set.requirements = sel.value ? (set.requirements || ["firstName", "lastName"]) : null; enChanged(); });
+          sel.addEventListener("change", function () { set.requirements = sel.value ? (set.requirements || ["firstName", "lastName"]) : null; changed(); });
           row.appendChild(sel);
           if (set.requirements) {
             var wrap = document.createElement("div"); wrap.className = "enreq";
             REQS.forEach(function (r) {
               var l = document.createElement("label"); l.className = "check-row"; var c = document.createElement("input"); c.type = "checkbox"; c.checked = set.requirements.indexOf(r[0]) >= 0;
-              c.addEventListener("change", function () { set.requirements = REQS.map(function (x) { return x[0]; }).filter(function (x) { return x === r[0] ? c.checked : set.requirements.indexOf(x) >= 0; }); save(); drawEnSummary(); });
+              c.addEventListener("change", function () { set.requirements = REQS.map(function (x) { return x[0]; }).filter(function (x) { return x === r[0] ? c.checked : set.requirements.indexOf(x) >= 0; }); save(); after(); });
               l.appendChild(c); l.appendChild(document.createTextNode(" " + r[1])); wrap.appendChild(l);
             });
             row.appendChild(wrap);
           }
-        } else if (f[2] === "num") {
-          var inp = document.createElement("input"); inp.type = "number"; inp.min = 0; inp.placeholder = "Same as your class's exam"; inp.title = "0 means no limit";
-          inp.value = set[k] == null ? "" : set[k];
-          inp.addEventListener("input", function () { set[k] = inp.value === "" ? null : Math.max(0, Math.round(Number(inp.value) || 0)); save(); drawEnSummary(); row.classList.toggle("changed", set[k] != null); });
+        } else if (type === "num" || type === "min") {
+          var inp = document.createElement("input"); inp.type = "number"; inp.min = type === "min" ? 2 : 0;
+          inp.placeholder = type === "min" ? "No time limit" : blank; inp.title = type === "min" ? "Blank: no time limit" : "0 means no limit";
+          inp.value = set[k] == null || set[k] === "off" ? "" : set[k];
+          inp.addEventListener("input", function () { set[k] = inp.value === "" ? null : Math.max(type === "min" ? 2 : 0, Math.round(Number(inp.value) || 0)); save(); after(); row.classList.toggle("changed", set[k] != null); });
           row.appendChild(inp);
         } else {
           var se = document.createElement("select");
-          se.innerHTML = '<option value="">Same as your class\'s exam</option>' + f[2].map(function (o) { return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + "</option>"; }).join("");
+          se.innerHTML = '<option value="">' + blank + '</option>' + f[2].map(function (o) { return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + "</option>"; }).join("");
           se.value = set[k] == null ? "" : set[k];
-          se.addEventListener("change", function () { set[k] = se.value || null; if (k === "lockdown" && se.value === "medium" && !set.leave) set.leave = "5"; enChanged(); });
+          se.addEventListener("change", function () { set[k] = se.value || null; if (k === "lockdown" && se.value === "medium" && !set.leave) set.leave = "5"; changed(); });
           row.appendChild(se);
         }
         gd.appendChild(row);
       });
       box.appendChild(gd);
     });
-    drawEnSummary();
+    after();
   }
-  function enChanged() { save(); drawEnSettings(); }
+  function drawEnSettings() {
+    drawSettingsInto($("enSettings"), enSetOf(cur), "tc", drawEnSummary);
+    drawSettingsInto($("classSettings"), classSetOf(cur), "class", drawClassSummary);
+  }
+  function countSet(set) { return Object.keys(set).filter(function (k) { return set[k] != null; }).length; }
   function drawEnSummary() {
-    var set = enSetOf(cur), n = Object.keys(set).filter(function (k) { return set[k] != null; }).length;
+    var set = enSetOf(cur), n = countSet(set);
     $("enSetSummary").textContent = n ? n + (n === 1 ? " setting changed" : " settings changed") : "As in your class's exam";
     $("enTimeLimit").closest("label").title = set.timeLimit === "off" ? "The TC Builder turns it off" : "";
   }
+  function drawClassSummary() {
+    var set = classSetOf(cur), n = countSet(set);
+    $("classSetSummary").textContent = (set.timeLimit ? set.timeLimit + "-minute time limit · " : "") + (n ? n + (n === 1 ? " setting" : " settings") + " set" : "Exam.net's defaults");
+  }
+  // ---------------------------------------------------------------
+  // Making the exam here: its questions, as Exam.net's question types
+  // (informationBlock, freeText, simpleAnswer, multipleChoice).
+  // ---------------------------------------------------------------
+  var QTYPES = { info: "Instructions or a passage", free: "Written answer", short: "Short answer", mc: "Multiple choice" };
+  var QPH = { info: "Instructions, a passage, anything students read", free: "The prompt or question", short: "The question", mc: "The question" };
+  function newQuestion(type) {
+    var q = { id: makeId("q"), type: type, html: "", points: type === "info" ? 0 : 1 };
+    if (type === "free") { q.wordLimit = ""; q.hardLimit = false; }
+    if (type === "short") { q.answers = ""; q.caseSensitive = false; }
+    if (type === "mc") { q.options = [{ id: makeId("o"), text: "", correct: true }, { id: makeId("o"), text: "", correct: false }]; q.multi = false; q.shuffle = true; }
+    return q;
+  }
+  // Keep only the formatting Exam.net's editor has (bold, italics,
+  // underline, lists, lines); everything pasted in from elsewhere is dropped.
+  var KEEP = { B: "strong", STRONG: "strong", I: "em", EM: "em", U: "u", UL: "ul", OL: "ol", LI: "li", BR: "br", SUB: "sub", SUP: "sup" };
+  function cleanHtml(html) {
+    var src = document.createElement("div"); src.innerHTML = html || "";
+    function walk(node, out) {
+      [].slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) { out.appendChild(document.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1) return;
+        var t = n.tagName, st = n.getAttribute("style") || "";
+        if (t === "DIV" || t === "P" || /^H[1-6]$/.test(t)) { var d = document.createElement("div"); walk(n, d); out.appendChild(d); return; }
+        var keep = KEEP[t] || (t === "SPAN" && /font-weight:\s*(bold|[6-9]00)/.test(st) ? "strong" : t === "SPAN" && /font-style:\s*italic/.test(st) ? "em" : null);
+        if (keep) { var e = document.createElement(keep); walk(n, e); out.appendChild(e); } else walk(n, out);
+      });
+    }
+    var tmp = document.createElement("div"); walk(src, tmp);
+    // Lines: loose text and inline runs go in their own <div>, as Exam.net writes them.
+    var out = document.createElement("div"), line = null;
+    [].slice.call(tmp.childNodes).forEach(function (n) {
+      var block = n.nodeType === 1 && /^(DIV|UL|OL)$/.test(n.tagName);
+      if (block) { line = null; out.appendChild(n); return; }
+      if (n.nodeType === 1 && n.tagName === "BR") { if (!line) { line = document.createElement("div"); out.appendChild(line); } line.appendChild(n); line = null; return; }
+      if (!line) { line = document.createElement("div"); out.appendChild(line); }
+      line.appendChild(n);
+    });
+    return out.innerHTML.replace(/<div><\/div>/g, "<div><br></div>");
+  }
+  function plain(html) { var d = document.createElement("div"); d.innerHTML = html || ""; return d.textContent.trim(); }
+  function richField(q, ph) {
+    var wrap = document.createElement("div");
+    var bar = document.createElement("div"); bar.className = "rtbar";
+    var ed = document.createElement("div"); ed.className = "rt"; ed.contentEditable = "true"; ed.dataset.ph = ph; ed.innerHTML = q.html || "";
+    [["bold", "<b>B</b>", "Bold (⌘B)"], ["italic", "<i>I</i>", "Italic (⌘I)"], ["underline", "<u>U</u>", "Underline (⌘U)"], ["insertUnorderedList", "• List", "Bulleted list"], ["insertOrderedList", "1. List", "Numbered list"]].forEach(function (c) {
+      var b = document.createElement("button"); b.type = "button"; b.innerHTML = c[1]; b.title = c[2];
+      b.addEventListener("mousedown", function (e) { e.preventDefault(); document.execCommand(c[0]); q.html = cleanHtml(ed.innerHTML); save(); });
+      bar.appendChild(b);
+    });
+    ed.addEventListener("input", function () { q.html = cleanHtml(ed.innerHTML); save(); drawQTally(); });
+    ed.addEventListener("blur", function () { if (plain(ed.innerHTML) === "" && !/<li/.test(ed.innerHTML)) { ed.innerHTML = ""; q.html = ""; save(); } });
+    wrap.appendChild(bar); wrap.appendChild(ed);
+    return wrap;
+  }
+  function numIn(val, min, fn, title) { var i = document.createElement("input"); i.type = "number"; i.min = min; i.value = val; if (title) i.title = title; i.addEventListener("input", function () { fn(i.value); save(); drawQTally(); }); return i; }
+  function chk(label, val, fn) { var l = document.createElement("label"); l.className = "check-row"; var c = document.createElement("input"); c.type = "checkbox"; c.checked = !!val; c.addEventListener("change", function () { fn(c.checked); save(); }); l.appendChild(c); l.appendChild(document.createTextNode(" " + label)); return l; }
+  function lbl(t, node) { var l = document.createElement("label"); l.className = "check-row"; l.appendChild(document.createTextNode(t + " ")); l.appendChild(node); return l; }
+  function drawQuestions() {
+    var a = cur, box = $("qList"); box.innerHTML = ""; var n = 0;
+    a.questions.forEach(function (q, i) {
+      var card = document.createElement("div"); card.className = "q" + (q.type === "info" ? " info" : "");
+      var top = document.createElement("div"); top.className = "qtop";
+      top.innerHTML = '<span class="qn">' + (q.type === "info" ? "" : ++n) + '</span><span class="qt">' + esc(QTYPES[q.type]) + "</span>";
+      [["↑", "Move up", i === 0, function () { a.questions.splice(i - 1, 0, a.questions.splice(i, 1)[0]); }],
+       ["↓", "Move down", i === a.questions.length - 1, function () { a.questions.splice(i + 1, 0, a.questions.splice(i, 1)[0]); }],
+       ["✕", "Remove this question", false, function () { if (plain(q.html) && !confirm("Remove this question?")) return false; a.questions.splice(i, 1); }]].forEach(function (c) {
+        var b = document.createElement("button"); b.type = "button"; b.className = "xbtn"; b.textContent = c[0]; b.title = c[1]; b.disabled = c[2];
+        b.addEventListener("click", function () { if (c[3]() === false) return; save(); drawQuestions(); });
+        top.appendChild(b);
+      });
+      card.appendChild(top);
+      card.appendChild(richField(q, QPH[q.type]));
+      var opts = document.createElement("div"); opts.className = "qopts";
+      if (q.type !== "info" && q.type !== "mc") opts.appendChild(lbl("Points", numIn(q.points, 0, function (v) { q.points = v; })));
+      if (q.type === "free") {
+        opts.appendChild(lbl("Word limit", numIn(q.wordLimit, 0, function (v) { q.wordLimit = v; }, "Blank: no limit")));
+        opts.appendChild(chk("Stop them at the limit (otherwise just warn)", q.hardLimit, function (v) { q.hardLimit = v; }));
+      }
+      if (q.type === "short") {
+        var ta = document.createElement("textarea"); ta.rows = 2; ta.placeholder = "Answers that count as right, one a line (blank: you mark it yourself)"; ta.value = q.answers || "";
+        ta.addEventListener("input", function () { q.answers = ta.value; save(); });
+        opts.appendChild(ta);
+        opts.appendChild(chk("Capitals matter", q.caseSensitive, function (v) { q.caseSensitive = v; }));
+      }
+      card.appendChild(opts);
+      if (q.type === "mc") {
+        q.options.forEach(function (o, j) {
+          var r = document.createElement("div"); r.className = "mcopt";
+          r.innerHTML = '<span class="let">' + String.fromCharCode(65 + j) + "</span>";
+          var t = document.createElement("input"); t.value = o.text; t.placeholder = "Choice " + String.fromCharCode(65 + j);
+          t.addEventListener("input", function () { o.text = t.value; save(); });
+          t.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); q.options.splice(j + 1, 0, { id: makeId("o"), text: "", correct: false }); save(); drawQuestions(); var ins = $("qList").querySelectorAll(".q")[i].querySelectorAll(".mcopt input:not([type])"); if (ins[j + 1]) ins[j + 1].focus(); } });
+          var c = chk("Right answer", o.correct, function (v) { if (v && !q.multi) q.options.forEach(function (x) { x.correct = false; }); o.correct = v; save(); drawQuestions(); });
+          var x = document.createElement("button"); x.type = "button"; x.className = "xbtn"; x.textContent = "✕"; x.title = "Remove this choice"; x.disabled = q.options.length <= 2;
+          x.addEventListener("click", function () { q.options.splice(j, 1); save(); drawQuestions(); });
+          [t, c, x].forEach(function (e) { r.appendChild(e); });
+          card.appendChild(r);
+        });
+        var mo = document.createElement("div"); mo.className = "qopts";
+        var add = document.createElement("button"); add.type = "button"; add.className = "btn btn-sm"; add.textContent = "+ Add a choice";
+        add.addEventListener("click", function () { q.options.push({ id: makeId("o"), text: "", correct: false }); save(); drawQuestions(); });
+        mo.appendChild(add);
+        mo.appendChild(lbl("Points", numIn(q.points, 0, function (v) { q.points = v; })));
+        mo.appendChild(chk("Students can pick more than one", q.multi, function (v) { q.multi = v; if (!v) { var f = q.options.find(function (x) { return x.correct; }); q.options.forEach(function (x) { x.correct = x === f; }); } drawQuestions(); }));
+        mo.appendChild(chk("Shuffle the choices", q.shuffle, function (v) { q.shuffle = v; }));
+        card.appendChild(mo);
+      }
+      box.appendChild(card);
+    });
+    if (!a.questions.length) box.innerHTML = '<div class="empty-note" style="margin-top:10px">Add the prompt, a passage or questions below. For an essay, add a written answer with the prompt in it.</div>';
+    drawQTally();
+  }
+  function drawQTally() {
+    var qs = cur.questions, n = qs.filter(function (q) { return q.type !== "info"; }).length, pts = qs.reduce(function (t, q) { return t + (q.type === "info" ? 0 : Number(q.points) || 0); }, 0);
+    $("qTally").textContent = n ? n + (n === 1 ? " question" : " questions") + " · " + pts + (pts === 1 ? " point" : " points") : "";
+  }
+  $("qAdd").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-q]"); if (!b || !cur) return;
+    cur.questions.push(newQuestion(b.dataset.q)); save(); drawQuestions();
+    var eds = $("qList").querySelectorAll(".rt"); if (eds.length) eds[eds.length - 1].focus();
+  });
+  function drawEnMode() {
+    var a = cur, build = a.enMode === "build";
+    $("enModeSeg").querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.dataset.v === a.enMode); });
+    $("enBuildWrap").hidden = !build; $("enSourceWrap").hidden = build;
+    $("enName").placeholder = build ? (enClassNames(a)[0] || "e.g. Odyssey In-Class Essay") + " TC" : "e.g. Chapter 5 Test TC";
+    var seg = $("enPeriodSeg"); seg.innerHTML = "";
+    "ABCDEFGH".split("").forEach(function (L) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = L; b.className = a.enPeriods.indexOf(L) >= 0 ? "on" : ""; b.title = "Make one for " + L + " period";
+      b.addEventListener("click", function () { var i = a.enPeriods.indexOf(L); if (i >= 0) a.enPeriods.splice(i, 1); else { a.enPeriods.push(L); a.enPeriods.sort(); } save(); drawEnMode(); });
+      seg.appendChild(b);
+    });
+    var built = a.enClassBuilt || [];
+    $("enClassBuilt").innerHTML = built.length ? "In Exam.net: " + built.map(function (x) { return esc(x.name) + ' <span class="num">' + esc(x.key) + "</span>"; }).join(" · ") : "";
+  }
+  $("enModeSeg").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || !cur) return; cur.enMode = b.dataset.v; save(); drawEnMode(); });
+  bind("enClassName", "enClassName");
+  $("enClassName").addEventListener("input", function () { if (cur && !cur.enNameSet) { cur.enName = ""; $("enName").value = ""; drawEnMode(); } });
+  function enClassNames(a) {
+    var base = (a.enClassName || a.title || "").trim(); if (!base) return [];
+    return a.enPeriods.length ? a.enPeriods.map(function (L) { return base + " - " + L; }) : [base];
+  }
+  function tcName(a) { return a.enName.trim() || ((a.enMode === "build" ? enClassNames(a)[0] : a.enSource.trim()) ? (a.enMode === "build" ? (a.enClassName || a.title).trim() : a.enSource.trim()) + " TC" : ""); }
+
+  // Exam.net's own form of each question (as its editor saves them).
+  function rid() { var c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", o = ""; for (var i = 0; i < 10; i++) o += c.charAt(Math.floor(Math.random() * c.length)); return o; }
+  function compileQuestions(a) {
+    var next = 1;
+    return a.questions.map(function (q) {
+      var id = next++, pts = q.type === "info" ? 0 : Math.max(0, Number(q.points) || 0), html = cleanHtml(q.html) || "<div><br></div>";
+      var sub = { id: id, type: "", point: pts, subNumber: "", question: html, answerOptions: null, formatting: { answerArea: null }, settings: { autoGrade: false } };
+      var rules = {}, answers = {};
+      var auto = { autoGrade: true, onePointPerAnswer: true, commaSensitive: false, caseSensitive: false, ignoreSpaces: false, shuffle: true, gradePerRow: true, gradingMode: "answer" };
+      if (q.type === "info") { sub.type = "informationBlock"; rules[id] = []; answers[id] = null; }
+      if (q.type === "free") {
+        sub.type = "freeText";
+        if (Number(q.wordLimit) > 0) sub.settings.wordLimitSettings = { wordLimit: Number(q.wordLimit), limitEnforcement: q.hardLimit ? "hard" : "soft" };
+        rules[id] = [{ id: rid(), correct: -1, wrong: 0, label: "CORRECT_ANSWER", point: pts }]; answers[id] = "";
+      }
+      if (q.type === "short") {
+        var acc = String(q.answers || "").split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+        sub.type = "simpleAnswer"; sub.settings = Object.assign({}, auto, { autoGrade: acc.length > 0, caseSensitive: !!q.caseSensitive });
+        rules[id] = [{ id: rid(), correct: -1, wrong: 0, label: "CORRECT_ANSWER", point: pts }]; answers[id] = acc;
+      }
+      if (q.type === "mc") {
+        sub.type = "multipleChoice";
+        sub.answerOptions = q.options.filter(function (o) { return o.text.trim(); }).map(function (o) { o.n = next++; return { id: o.n, label: "<div>" + esc(o.text.trim()) + "</div>" }; });
+        sub.formatting.previewType = q.multi ? "checkbox" : "radio";
+        sub.settings = Object.assign({}, auto, { shuffle: q.shuffle !== false });
+        var right = q.options.filter(function (o) { return o.text.trim() && o.correct; }).map(function (o) { return o.n; });
+        rules[id] = q.multi ? [{ id: rid(), correct: -1, wrong: 0, label: "CORRECT_ANSWER", point: pts }] : [{ id: rid(), correct: 1, wrong: 0, label: "At least 1 correct, and max 0 wrong", point: pts }];
+        answers[id] = right;
+      }
+      return { subQuestions: [sub], gradingRules: rules, answers: answers };
+    });
+  }
+  function examProblems(a) {
+    var p = [];
+    if (a.enMode === "build") {
+      if (!enClassNames(a).length) p.push("Give your class's exam a name.");
+      if (!a.questions.length) p.push("Add the exam's prompt or questions.");
+      a.questions.forEach(function (q, i) {
+        if (q.type === "mc") {
+          if (q.options.filter(function (o) { return o.text.trim(); }).length < 2) p.push("Question " + (i + 1) + " needs at least two choices.");
+          else if (!q.options.some(function (o) { return o.text.trim() && o.correct; })) p.push("Question " + (i + 1) + " has no right answer marked.");
+        }
+      });
+    } else if (!a.enSource.trim()) p.push("Fill in your class's exam (its name or key).");
+    return p;
+  }
   function enSpec(a) {
-    var set = enSetOf(a), src = a.enSource.trim(), keyLike = /^[A-Za-z0-9]{6}$/.test(src) && !/\s/.test(src);
-    return { v: BUILDER_V, from: location.origin, aid: a.id, source: { key: keyLike ? src : "", name: src }, name: a.enName.trim() || (src + " TC"),
-      share: "testingcenterud@horacemann.org", settings: set };
+    var src = a.enSource.trim(), keyLike = /^[A-Za-z0-9]{6}$/.test(src);
+    var spec = { v: BUILDER_V, from: location.origin, aid: a.id, name: tcName(a), share: "testingcenterud@horacemann.org", settings: enSetOf(a) };
+    if (a.enMode === "build") spec.build = { names: enClassNames(a), questions: compileQuestions(a), settings: classSetOf(a) };
+    else spec.source = { key: keyLike ? src : "", name: src };
+    return spec;
   }
   $("enBuild").addEventListener("click", function () {
-    var a = cur, src = a.enSource.trim(), name = a.enName.trim() || (src ? src + " TC" : "");
+    var a = cur, name = tcName(a), build = a.enMode === "build";
     if (!a.enName.trim() && name) { a.enName = name; $("enName").value = name; save(); }
     $("enSetup").hidden = db.builderV === BUILDER_V;
     $("enBookmarkNote").textContent = db.builderV && db.builderV !== BUILDER_V ? "The TC Builder has been updated: drag it to your bookmarks bar again (and delete the old one)." : "Already have it? It only needs dragging again when this page says it's been updated.";
+    var names = enClassNames(a).map(function (x) { return "“" + esc(x) + "”"; }).join(", ");
     $("enSteps").innerHTML = [
       "Click <b>Open Exam.net</b> (sign in if it asks).",
       "On that tab, click <b>TC Builder</b> in your bookmarks bar.",
-      "Check what it found and click <b>Build it</b>: it copies " + (src ? "“" + esc(src) + "”" : "your class's exam") + " as “" + esc(name || "… TC") + "”, sets its settings and gives testingcenterud@horacemann.org access as an invigilator. The key comes back here."
+      build ? "Check what it says and click <b>Build it</b>: it makes your class's exam " + (names || "") + " with its questions and settings, then a copy for the Testing Center as “" + esc(name || "… TC") + "” with testingcenterud@horacemann.org as its invigilator. The keys come back here."
+        : "Check what it found and click <b>Build it</b>: it copies " + (a.enSource.trim() ? "“" + esc(a.enSource.trim()) + "”" : "your class's exam") + " as “" + esc(name || "… TC") + "”, sets its settings and gives testingcenterud@horacemann.org access as an invigilator. The key comes back here."
     ].map(function (t, i) { return "<li><b>" + (i + 1) + "</b>&nbsp;" + t + "</li>"; }).join("");
-    $("enManual").innerHTML = ["Duplicate “" + (src || "your class's exam") + "” as “" + (name || "… TC") + "”.", "In the copy's settings, turn the time limit off (and set the rest as above).", "Share it: give testingcenterud@horacemann.org Access.", "Copy the copy's exam key."]
+    $("enManual").innerHTML = ["Duplicate " + (build ? "your class's exam" : "“" + (a.enSource.trim() || "your class's exam") + "”") + " as “" + (name || "… TC") + "”.", "In the copy's settings, turn the time limit off (and set the rest as above).", "Share it: give testingcenterud@horacemann.org Access.", "Copy the copy's exam key."]
       .map(function (t, i) { return "<li><b>" + (i + 1) + "</b>&nbsp;" + esc(t) + "</li>"; }).join("");
     $("enKey2").value = a.enKey || "";
-    $("enResult").hidden = true;
+    var p = examProblems(a), r = $("enResult");
+    r.hidden = !p.length; r.className = "tally warn"; r.textContent = p.join(" ");
     $("enBox").showModal();
   });
   $("enBookmark").href = "javascript:" + encodeURIComponent("(" + examNetBuilder.toString() + ")()");
   $("enBookmark").addEventListener("click", function (e) { e.preventDefault(); $("enBookmarkNote").textContent = "Drag it (don't click it) to your bookmarks bar. If the bar is hidden, press ⌘⇧B."; });
   $("enBookmark").addEventListener("dragend", function () { db.builderV = BUILDER_V; save(); });
   $("enOpen").addEventListener("click", function () {
-    if (!cur.enSource.trim()) { $("enResult").hidden = false; $("enResult").className = "tally warn"; $("enResult").textContent = "Fill in your class's exam (its name or key) first."; return; }
+    var p = examProblems(cur), r = $("enResult");
+    if (p.length) { r.hidden = false; r.className = "tally warn"; r.textContent = p.join(" "); return; }
     db.builderV = db.builderV || BUILDER_V; save();
     window.open("https://exam.net/admin/exams#tcbuild=" + btoa(unescape(encodeURIComponent(JSON.stringify(enSpec(cur))))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""), "examnetBuild");
-    $("enResult").hidden = false; $("enResult").className = "tally"; $("enResult").textContent = "Waiting for the TC Builder in the Exam.net tab…";
+    r.hidden = false; r.className = "tally"; r.textContent = "Waiting for the TC Builder in the Exam.net tab…";
   });
   function markBuilt(a, key, name) {
     a.enKey = key || a.enKey; if (name) a.enName = name;
@@ -1289,12 +1658,17 @@ function examNetBuilder() {
     if (e.origin !== "https://exam.net" || !e.data || e.data.type !== "tcbuild-done") return;
     var a = db.exams.find(function (x) { return x.id === e.data.aid; }); if (!a) return;
     markBuilt(a, e.data.key, e.data.name);
-    db.enDefaults = Object.assign({}, enSetOf(a)); save();
+    if (e.data.classExams) a.enClassBuilt = e.data.classExams;
+    db.enDefaults = Object.assign({}, enSetOf(a));
+    if (a.enMode === "build") db.classDefaults = Object.assign({}, classSetOf(a));
+    save();
     if (cur === a) {
+      drawEnMode();
       $("enBuilt").textContent = "Built: " + e.data.name + " · " + e.data.key;
       var r = $("enResult"); r.hidden = false;
       r.className = "tally " + (e.data.problems && e.data.problems.length ? "warn" : "ok");
-      r.textContent = "Built “" + e.data.name + "”, exam key " + e.data.key + "." + (e.data.problems && e.data.problems.length ? " Check in Exam.net: " + e.data.problems.join("; ") + "." : "");
+      r.textContent = (e.data.classExams && e.data.classExams.length ? "Your class's exam: " + e.data.classExams.map(function (x) { return x.name + " (" + x.key + ")"; }).join(", ") + ". " : "") +
+        "Testing Center copy: “" + e.data.name + "”, exam key " + e.data.key + "." + (e.data.problems && e.data.problems.length ? " Check in Exam.net: " + e.data.problems.join("; ") + "." : "");
     }
   });
   $("enKey2").addEventListener("input", function () {
