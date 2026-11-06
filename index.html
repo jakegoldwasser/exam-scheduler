@@ -95,8 +95,8 @@
   .seg button + button { border-left: 1px solid var(--line-strong); }
   .seg button.on { background: var(--ink); color: var(--surface); }
 
-  .srow { display: grid; grid-template-columns: minmax(140px, 1fr) 58px 150px 100px 24px; grid-template-areas: "name grade extra mk x" "cls cls sched sched x"; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg { grid-area: extra; justify-self: start; } .srow > .mk { grid-area: mk; } .srow > .x { grid-area: x; align-self: start; }
+  .srow { display: grid; grid-template-columns: minmax(130px, 1fr) 58px 150px auto 24px; grid-template-areas: "name grade extra mk x" "cls cls sched sched x"; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg:not(.mk) { grid-area: extra; justify-self: start; } .srow > .mk { justify-self: start; } .srow > .mk { grid-area: mk; } .srow > .x { grid-area: x; align-self: start; }
   .srow > .cls { grid-area: cls; } .srow > .sched { grid-area: sched; }
   .srow.head { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding-top: 0; }
   .srow input, .srow select { padding: 5px 7px; font-size: 13px; }
@@ -398,7 +398,7 @@
 <dialog class="modal" id="pasteBox">
   <div class="modal-inner">
     <div class="modal-head"><h2>Paste a List of Students</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
-    <p class="note" style="margin:0 0 10px">One student a line. Add 1.5x or 2x after a name for extra time, and "make-up" for a make-up (e.g. <span class="num">Caspian C., 1.5x</span>). Students you've entered before keep their grade and extra time.</p>
+    <p class="note" style="margin:0 0 10px">One student a line. Add 1.5x or 2x after a name for extra time, "all in TC" if they take all of it in the Testing Center, and "make-up" for a make-up (e.g. <span class="num">Caspian C., 1.5x, all in TC</span>). Students you've entered before keep their grade and extra time.</p>
     <textarea id="pasteText" rows="8"></textarea>
     <div class="field-grid" style="margin-top:10px">
       <div class="field"><label for="pasteDate">Their class takes it on</label><input id="pasteDate" type="date"></div>
@@ -784,7 +784,10 @@ function examNetBuilder() {
     var st = partStart(p);
     return periodName(p.period) + (p.len === "first" ? ", first half" : p.len === "second" ? ", second half" : p.len === "min" ? ", " + partMin(p) + " min" : "") + " · " + clock(st) + "–" + clock(st + partMin(p));
   }
-  function needsTC(a, s) { return s.makeup || mult(s) > 1; }
+  function needsTC(a, s) { return s.makeup || mult(s) > 1 || s.withClass === false; }
+  // Where a student takes it (the Testing Center's guidelines: students with
+  // accommodations may take all of it there; Jake's usual is to start with the class).
+  function whereOf(s) { return s.makeup ? "makeup" : s.withClass === false ? "tc" : "class"; }
   function scheduledMin(a, s) { return (classPart(a, s) ? classMin(a, s) : 0) + s.parts.reduce(function (t, p) { return t + partMin(p); }, 0); }
   function sortedParts(s) { return s.parts.slice().sort(function (x, y) { return x.date < y.date ? -1 : x.date > y.date ? 1 : partStart(x) - partStart(y); }); }
 
@@ -982,20 +985,27 @@ function examNetBuilder() {
       var cp = document.createElement("select"); cp.innerHTML = letterOpts; cp.value = s.classPeriod || "A"; cp.title = "Their class's period";
       cd.addEventListener("change", function () { s.classDate = cd.value; a.classDate = cd.value; save(); drawStudents(); drawPreview(); });
       cp.addEventListener("change", function () { s.classPeriod = cp.value; s.periodSet = true; a.classPeriod = cp.value; remember(s); save(); drawStudents(); drawPreview(); });
-      cls.appendChild(document.createTextNode("Class takes it")); cls.appendChild(cd); cls.appendChild(cp);
+      cls.appendChild(document.createTextNode("Class:")); cls.title = "When their class takes it"; cls.appendChild(cd); cls.appendChild(cp);
       var extra = document.createElement("span"); extra.className = "seg"; extra.title = "Extra time";
       [["none", "None"], ["1.5", "1.5×"], ["2", "2×"]].forEach(function (o) {
         var b = document.createElement("button"); b.type = "button"; b.textContent = o[1]; b.className = s.extra === o[0] ? "on" : "";
         b.addEventListener("click", function () { s.extra = o[0]; s.touched = true; remember(s); save(); drawStudents(); drawPreview(); });
         extra.appendChild(b);
       });
-      var mk = document.createElement("label"); mk.className = "check-row mk";
-      var mkc = document.createElement("input"); mkc.type = "checkbox"; mkc.checked = s.makeup;
-      mkc.addEventListener("change", function () { s.makeup = mkc.checked; save(); drawStudents(); drawPreview(); });
-      mk.appendChild(mkc); mk.appendChild(document.createTextNode(" Make-up"));
+      var mk = document.createElement("span"); mk.className = "seg mk";
+      [["class", "Starts in class", "Takes the first part with their class, then finishes in the Testing Center"], ["tc", "All in the TC", "Takes all of it in the Testing Center, starting at their class's period"], ["makeup", "Make-up", "Missed it: takes all of it in the Testing Center on another day"]].forEach(function (o) {
+        var b = document.createElement("button"); b.type = "button"; b.textContent = o[1]; b.title = o[2]; b.className = whereOf(s) === o[0] ? "on" : "";
+        b.addEventListener("click", function () {
+          if (whereOf(s) === o[0]) return;
+          if (s.parts.length && !confirm("Change where " + (s.name.trim() || "this student") + " takes it? Their Testing Center schedule will need redoing.")) return;
+          s.makeup = o[0] === "makeup"; s.withClass = o[0] === "class"; s.parts = [];
+          save(); drawStudents(); drawPreview();
+        });
+        mk.appendChild(b);
+      });
       var sched = document.createElement("div"); sched.className = "sched";
       var what = document.createElement("span"); what.className = "what";
-      if (!needsTC(a, s)) { what.textContent = "With the class"; sched.appendChild(what); }
+      if (!needsTC(a, s)) { what.textContent = "With the class (no extra time)"; sched.appendChild(what); }
       else {
         var sits = sittings(a, s), short = needMin(a, s) - scheduledMin(a, s);
         if (sits[0].unscheduled) { what.textContent = "Not scheduled yet"; what.classList.add("warn"); }
@@ -1026,10 +1036,11 @@ function examNetBuilder() {
     $("pasteText").value.split(/\n/).forEach(function (line) {
       line = line.trim(); if (!line) return;
       var makeup = /make[- ]?up/i.test(line), m = line.match(/\b(1\.5|2)\s*[x×]/i), none = /\bno extra|\b1\s*[x×]/i.test(line), pm = line.match(/\b([A-H])\s*period\b|\bperiod\s*([A-H])\b/i);
-      var name = line.replace(/,?\s*(make[- ]?up|1\.5\s*[x×]|2\s*[x×]|1\s*[x×]|no extra( time)?|\b[A-H]\s*period\b|\bperiod\s*[A-H]\b)/ig, "").replace(/[,;\t]+$/, "").trim();
+      var name = line.replace(/,?\s*(make[- ]?up|1\.5\s*[x×]|2\s*[x×]|1\s*[x×]|no extra( time)?|\b[A-H]\s*period\b|\bperiod\s*[A-H]\b|\b(all|whole)( of it)?( in (the )?(tc|testing center|test center))?)/ig, "").replace(/[,;\t]+$/, "").trim();
       var s = newStudent(cur, name, $("pasteDate").value, pm ? (pm[1] || pm[2]).toUpperCase() : $("pastePeriod").value);
       if (m) s.extra = m[1]; else if (none) s.extra = "none";
-      s.makeup = makeup; remember(s); cur.students.push(s);
+      s.makeup = makeup; if (!makeup && /\b(all|whole)\b.*\b(tc|testing center|test center)\b|\bwhole\b/i.test(line)) s.withClass = false;
+      remember(s); cur.students.push(s);
     });
     save(); $("pasteBox").close(); drawStudents(); drawPreview();
   });
@@ -1055,6 +1066,7 @@ function examNetBuilder() {
     var letters = PERIODS.filter(function (p) { return p.id.length === 1; });
     if (last) { date = last.date; idx = letters.findIndex(function (p) { return p.id === last.period; }) + 1; }
     else if (!s.makeup && editing.withClass && s.classDate) { date = s.classDate; idx = letters.findIndex(function (p) { return p.id === s.classPeriod; }) + 1; }
+    else if (!s.makeup && s.classDate && s.classDate >= todayISO()) { date = s.classDate; idx = Math.max(0, letters.findIndex(function (p) { return p.id === s.classPeriod; })); }
     else { date = s.classDate && s.classDate >= todayISO() ? nextSchoolDay(s.classDate) : nextSchoolDay(todayISO()); idx = Math.max(0, letters.findIndex(function (p) { return p.id === s.classPeriod; })); }
     while (left > 0 && editing.parts.length < 8) {
       if (idx >= letters.length || idx < 0) { date = nextSchoolDay(date); idx = 0; }
@@ -1111,7 +1123,8 @@ function examNetBuilder() {
   function whenText(p) {
     var h = holiday(p.date), wd = p.date ? dateOf(p.date).getDay() : 1;
     return partLabel(p) + (h ? " · ⚠ " + h + ": school is likely closed" : (wd === 0 || wd === 6) ? " · ⚠ a weekend" : "") +
-      (p.date && p.date === editing.s.classDate && p.period === editing.s.classPeriod && !editing.s.makeup ? " · ⚠ that's their class's own time" : "");
+      (p.date && p.date === editing.s.classDate && p.period === editing.s.classPeriod && !editing.s.makeup && editing.withClass ? " · ⚠ that's their class's own time" : "") +
+      (p.len === "second" ? " · ⚠ the Testing Center wants every sitting to start at the start of a period" : "");
   }
   function drawTally() {
     var need = needMin(cur, editing.s), have = edMin(), t = $("schedTally");
@@ -1294,6 +1307,13 @@ function examNetBuilder() {
     if (a.examNet && (!tcName(a) || !a.enKey.trim())) w.push("The Exam.net copy's name or exam key is blank. The form requires both.");
     if (a.examNet && !(a.enCopy && a.enTimeLimit && a.enCoTeacher)) w.push("The form requires all three Exam.net boxes to be checked.");
     if (allSittings(a).some(function (x) { return x.unscheduled; })) w.push("Some students aren't scheduled yet, so their forms have no date.");
+    // The Testing Center's deadline: the cover sheet by 4pm the school day before.
+    var late = allSittings(a).filter(function (x) {
+      if (x.unscheduled) return false;
+      var d = dateOf(x.date); do { d.setDate(d.getDate() - 1); } while (d.getDay() === 0 || d.getDay() === 6 || holiday(isoOf(d)));
+      d.setHours(16, 0, 0, 0); return Date.now() > d.getTime() && x.date >= todayISO();
+    });
+    if (late.length) w.push("Past the Testing Center's deadline (4pm the school day before) for " + late.map(function (x) { return (x.s.name || "a student") + " on " + shortDay(x.date); }).join(", ") + ": you need permission from Dr. Pervil or Counseling.");
     if (a.students.some(function (s) { return needsTC(a, s) && !s.name.trim(); })) w.push("A student has no name.");
     w.push(attachments[a.id] ? "Attach " + attachments[a.id].fileName + " on the form's last page." : "If you're sending the test as a file, attach it on the form's last page.");
     return w;
@@ -1355,7 +1375,7 @@ function examNetBuilder() {
   ];
   var REQS = [["firstName", "First name"], ["lastName", "Last name"], ["email", "Email"], ["class", "Class"], ["teacher", "Teacher name"], ["phone", "Phone number"], ["studentId", "Student number"]];
   var BUILDER_V = 2;
-  function enSetOf(a) { if (!a.enSet) a.enSet = Object.assign({ timeLimit: "off" }, db.enDefaults || {}); return a.enSet; }
+  function enSetOf(a) { if (!a.enSet) a.enSet = Object.assign({ timeLimit: "off", lockdown: "high" }, db.enDefaults || {}); return a.enSet; }
   function classSetOf(a) { if (!a.classSet) a.classSet = Object.assign({}, db.classDefaults || {}); return a.classSet; }
   // Draws ENSET into box. kind "tc": blank = as in the class's exam;
   // kind "class": blank = Exam.net's default, and the time limit is minutes.
