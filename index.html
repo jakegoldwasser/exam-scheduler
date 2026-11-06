@@ -95,8 +95,8 @@
   .seg button + button { border-left: 1px solid var(--line-strong); }
   .seg button.on { background: var(--ink); color: var(--surface); }
 
-  .srow { display: grid; grid-template-columns: minmax(130px, 1fr) 58px 150px auto 24px; grid-template-areas: "name grade extra mk x" "cls cls sched sched x"; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg:not(.mk) { grid-area: extra; justify-self: start; } .srow > .mk { justify-self: start; } .srow > .mk { grid-area: mk; } .srow > .x { grid-area: x; align-self: start; }
+  .srow { display: grid; grid-template-columns: minmax(200px, 1fr) 58px minmax(250px, auto) 24px; grid-template-areas: "name grade extra x" "mk mk mk x" "cls cls sched x"; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg:not(.mk) { grid-area: extra; justify-self: start; } .srow > .mk { grid-area: mk; justify-self: start; } .srow > .x { grid-area: x; align-self: start; }
   .srow > .cls { grid-area: cls; } .srow > .sched { grid-area: sched; }
   .srow.head { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding-top: 0; }
   .srow input, .srow select { padding: 5px 7px; font-size: 13px; }
@@ -304,7 +304,7 @@
         </div>
         <div class="field-grid" style="margin-top:16px">
           <div class="field" id="enSourceWrap"><label for="enSource">Your class's exam (its name or exam key)</label><input id="enSource" placeholder="e.g. Chapter 5 Test, or nXnuQL"></div>
-          <div class="field"><label for="enName">Testing Center copy's name</label><input id="enName" placeholder="e.g. Chapter 5 Test TC"></div>
+          <div class="field"><label for="enName">Testing Center copy's name</label><input id="enName" placeholder="e.g. Chapter 5 Test Testing Center"></div>
           <div class="field"><label for="enKey">Testing Center copy's exam key</label><input id="enKey" class="num" placeholder="Filled in when it's built"></div>
         </div>
         <details class="ensettings" id="enSettingsWrap">
@@ -398,7 +398,7 @@
 <dialog class="modal" id="pasteBox">
   <div class="modal-inner">
     <div class="modal-head"><h2>Paste a List of Students</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
-    <p class="note" style="margin:0 0 10px">One student a line. Add 1.5x or 2x after a name for extra time, "all in TC" if they take all of it in the Testing Center, and "make-up" for a make-up (e.g. <span class="num">Caspian C., 1.5x, all in TC</span>). Students you've entered before keep their grade and extra time.</p>
+    <p class="note" style="margin:0 0 10px">One student a line. Add 1.5x or 2x after a name for extra time, "all in Testing Center" if they take all of it there, and "make-up" for a make-up (e.g. <span class="num">Caspian C., 1.5x, all in Testing Center</span>). Students you've entered before keep their grade and extra time.</p>
     <textarea id="pasteText" rows="8"></textarea>
     <div class="field-grid" style="margin-top:10px">
       <div class="field"><label for="pasteDate">Their class takes it on</label><input id="pasteDate" type="date"></div>
@@ -426,7 +426,7 @@
     <div class="modal-head"><h2>Build It in Exam.net</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
     <div id="enSetup">
       <p class="note" style="margin:0 0 10px"><b>Once:</b> drag this button to your bookmarks bar. It's how the Exam Scheduler works inside Exam.net, signed in as you.</p>
-      <p style="margin:0 0 6px"><a class="btn btn-primary" id="enBookmark" href="#" draggable="true" style="text-decoration:none;cursor:grab">TC Builder</a></p>
+      <p style="margin:0 0 6px"><a class="btn btn-primary" id="enBookmark" href="#" draggable="true" style="text-decoration:none;cursor:grab">Testing Center Builder</a></p>
       <p class="hint" style="margin:0 0 14px" id="enBookmarkNote">Already have it? It only needs dragging again when this page says it's been updated.</p>
     </div>
     <ol class="en-steps" id="enSteps"></ol>
@@ -445,7 +445,7 @@
 <div id="printArea"></div>
 
 <script>
-/* The TC Builder: the bookmark's code, run on exam.net as the signed-in
+/* The Testing Center Builder: the bookmark's code, run on exam.net as the signed-in
    teacher. It reads what to build from the address (#tcbuild=…, put there
    by the Exam Scheduler), duplicates the class's exam through Exam.net's own
    API (POST /api/duplicate/<id>), saves the copy's settings (PUT
@@ -465,11 +465,11 @@ function examNetBuilder() {
   function say(t, css) { var p = el("p", "margin:6px 0;" + (css || ""), t); P.appendChild(p); return p; }
   var spec = null;
   try { var m = location.hash.match(/tcbuild=([A-Za-z0-9_-]+)/); if (m) spec = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); } catch (e) {}
-  head("TC Builder");
-  if (location.hostname !== "exam.net") { say("Use this on Exam.net: open it from the Exam Scheduler's Build it in Exam.net, then click TC Builder on that tab."); return; }
-  if (!spec) { say("Nothing to build here. In the Exam Scheduler, open the assessment, click Build it in Exam.net…, then Open Exam.net, and click TC Builder on the tab it opens."); return; }
-  if (spec.v !== V) { say("This bookmark is out of date. In the Exam Scheduler's Build it in Exam.net…, drag TC Builder to your bookmarks bar again.", "color:#93630F"); return; }
-  if (location.pathname !== "/admin/exams") { say("Go to your exam list (Exams), then click TC Builder again."); P.appendChild(btn("Go to my exams", true, function () { location.href = "/admin/exams" + location.hash; })); return; }
+  head("Testing Center Builder");
+  if (location.hostname !== "exam.net") { say("Use this on Exam.net: open it from the Exam Scheduler's Build it in Exam.net, then click Testing Center Builder on that tab."); return; }
+  if (!spec) { say("Nothing to build here. In the Exam Scheduler, open the assessment, click Build it in Exam.net…, then Open Exam.net, and click Testing Center Builder on the tab it opens."); return; }
+  if (spec.v !== V) { say("This bookmark is out of date. In the Exam Scheduler's Build it in Exam.net…, drag Testing Center Builder to your bookmarks bar again.", "color:#93630F"); return; }
+  if (location.pathname !== "/admin/exams") { say("Go to your exam list (Exams), then click Testing Center Builder again."); P.appendChild(btn("Go to my exams", true, function () { location.href = "/admin/exams" + location.hash; })); return; }
   var xs = (document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1];
   var H = { "Accept": "application/json", "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" };
   if (xs) H["X-XSRF-TOKEN"] = decodeURIComponent(xs);
@@ -505,7 +505,7 @@ function examNetBuilder() {
     rows.forEach(function (r) { var o = new Option(r.name + " · " + r.key, r.id); if (src && r.id === src.id) o.selected = true; sel.appendChild(o); });
     if (!src) sel.options[0].selected = true;
     P.appendChild(sel);
-    if (!src) say("Couldn't find “" + spec.source.name + "” in this list" + (rows.length ? ": pick it above." : ". Is it in a folder or the archive? Open that, then click TC Builder again."), "color:#93630F");
+    if (!src) say("Couldn't find “" + spec.source.name + "” in this list" + (rows.length ? ": pick it above." : ". Is it in a folder or the archive? Open that, then click Testing Center Builder again."), "color:#93630F");
   }
   say((B ? "Then copy it for the Testing Center " : "") + "as “" + spec.name + "”, give testingcenterud@horacemann.org access as an invigilator, and set:", "margin-top:10px");
   var LBL = { timeLimit: "Time limit", anonymous: "Anonymize", selfResume: "Self-resume", requirements: "Students give", writeArea: "Writing area", wordLimit: "Word limit", spell: "Spellcheck", fileUpload: "Uploads", audioRecording: "Audio recording", calculator: "Calculator", desmos: "Desmos", drawingArea: "Drawing area", formula: "Formula sheet", chem: "Periodic table", tts: "Text to speech", stt: "Speech to text", translate: "Translation", enThesaurus: "English synonyms", lockdown: "Lockdown", leave: "Leaving full screen", screenMonitoring: "Screen monitoring" };
@@ -603,7 +603,7 @@ function examNetBuilder() {
     step("Making “" + name + "”…");
     /* Exam.net only makes new exams in its own editor, so: copy any exam,
        then put every setting back to Exam.net's defaults and the questions in. */
-    var base = rows.find(function (r) { return !/ TC$/.test(r.name); }) || rows[0];
+    var base = rows.find(function (r) { return !/ (TC|Testing Center)$/.test(r.name); }) || rows[0];
     if (!base) throw new Error("There's no exam in your list to start from. Make any exam in Exam.net, then try again");
     var made = await api("POST", "/api/duplicate/" + base.id, { examName: name });
     if (!made || !made.exam_id) throw new Error("Exam.net didn't say which exam it made");
@@ -618,7 +618,7 @@ function examNetBuilder() {
     return { id: made.exam_id, name: name, key: g3.examkey || made.examkey };
   }
   async function run(srcId) {
-    head("TC Builder"); var log = el("ol", "margin:4px 0;padding-left:20px;font-size:13px"); P.appendChild(log);
+    head("Testing Center Builder"); var log = el("ol", "margin:4px 0;padding-left:20px;font-size:13px"); P.appendChild(log);
     function step(t) { log.appendChild(el("li", "", t)); }
     var problems = [], made = [], newContent = null;
     try {
@@ -993,7 +993,7 @@ function examNetBuilder() {
         extra.appendChild(b);
       });
       var mk = document.createElement("span"); mk.className = "seg mk";
-      [["class", "Starts in class", "Takes the first part with their class, then finishes in the Testing Center"], ["tc", "All in the TC", "Takes all of it in the Testing Center, starting at their class's period"], ["makeup", "Make-up", "Missed it: takes all of it in the Testing Center on another day"]].forEach(function (o) {
+      [["class", "Starts in class", "Takes the first part with their class, then finishes in the Testing Center"], ["tc", "All in the Testing Center", "Takes all of it in the Testing Center, starting at their class's period"], ["makeup", "Make-up", "Missed it: takes all of it in the Testing Center on another day"]].forEach(function (o) {
         var b = document.createElement("button"); b.type = "button"; b.textContent = o[1]; b.title = o[2]; b.className = whereOf(s) === o[0] ? "on" : "";
         b.addEventListener("click", function () {
           if (whereOf(s) === o[0]) return;
@@ -1431,7 +1431,7 @@ function examNetBuilder() {
   function drawEnSummary() {
     var set = enSetOf(cur), n = countSet(set);
     $("enSetSummary").textContent = n ? n + (n === 1 ? " setting changed" : " settings changed") : "As in your class's exam";
-    $("enTimeLimit").closest("label").title = set.timeLimit === "off" ? "The TC Builder turns it off" : "";
+    $("enTimeLimit").closest("label").title = set.timeLimit === "off" ? "The Testing Center Builder turns it off" : "";
   }
   function drawClassSummary() {
     var set = classSetOf(cur), n = countSet(set);
@@ -1563,7 +1563,7 @@ function examNetBuilder() {
     var a = cur, build = a.enMode === "build";
     $("enModeSeg").querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.dataset.v === a.enMode); });
     $("enBuildWrap").hidden = !build; $("enSourceWrap").hidden = build;
-    $("enName").placeholder = build ? (enClassNames(a)[0] || "e.g. Odyssey In-Class Essay") + " TC" : "e.g. Chapter 5 Test TC";
+    $("enName").placeholder = build ? (enClassNames(a)[0] || "e.g. Odyssey In-Class Essay") + " Testing Center" : "e.g. Chapter 5 Test Testing Center";
     var seg = $("enPeriodSeg"); seg.innerHTML = "";
     "ABCDEFGH".split("").forEach(function (L) {
       var b = document.createElement("button"); b.type = "button"; b.textContent = L; b.className = a.enPeriods.indexOf(L) >= 0 ? "on" : ""; b.title = "Make one for " + L + " period";
@@ -1580,7 +1580,7 @@ function examNetBuilder() {
     var base = (a.enClassName || a.title || "").trim(); if (!base) return [];
     return a.enPeriods.length ? a.enPeriods.map(function (L) { return base + " - " + L; }) : [base];
   }
-  function tcName(a) { return a.enName.trim() || ((a.enMode === "build" ? enClassNames(a)[0] : a.enSource.trim()) ? (a.enMode === "build" ? (a.enClassName || a.title).trim() : a.enSource.trim()) + " TC" : ""); }
+  function tcName(a) { return a.enName.trim() || ((a.enMode === "build" ? enClassNames(a)[0] : a.enSource.trim()) ? (a.enMode === "build" ? (a.enClassName || a.title).trim() : a.enSource.trim()) + " Testing Center" : ""); }
 
   // Exam.net's own form of each question (as its editor saves them).
   function rid() { var c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", o = ""; for (var i = 0; i < 10; i++) o += c.charAt(Math.floor(Math.random() * c.length)); return o; }
@@ -1639,15 +1639,15 @@ function examNetBuilder() {
     var a = cur, name = tcName(a), build = a.enMode === "build";
     if (!a.enName.trim() && name) { a.enName = name; $("enName").value = name; save(); }
     $("enSetup").hidden = db.builderV === BUILDER_V;
-    $("enBookmarkNote").textContent = db.builderV && db.builderV !== BUILDER_V ? "The TC Builder has been updated: drag it to your bookmarks bar again (and delete the old one)." : "Already have it? It only needs dragging again when this page says it's been updated.";
+    $("enBookmarkNote").textContent = db.builderV && db.builderV !== BUILDER_V ? "The Testing Center Builder has been updated: drag it to your bookmarks bar again (and delete the old one)." : "Already have it? It only needs dragging again when this page says it's been updated.";
     var names = enClassNames(a).map(function (x) { return "“" + esc(x) + "”"; }).join(", ");
     $("enSteps").innerHTML = [
       "Click <b>Open Exam.net</b> (sign in if it asks).",
-      "On that tab, click <b>TC Builder</b> in your bookmarks bar.",
-      build ? "Check what it says and click <b>Build it</b>: it makes your class's exam " + (names || "") + " with its questions and settings, then a copy for the Testing Center as “" + esc(name || "… TC") + "” with testingcenterud@horacemann.org as its invigilator. The keys come back here."
-        : "Check what it found and click <b>Build it</b>: it copies " + (a.enSource.trim() ? "“" + esc(a.enSource.trim()) + "”" : "your class's exam") + " as “" + esc(name || "… TC") + "”, sets its settings and gives testingcenterud@horacemann.org access as an invigilator. The key comes back here."
+      "On that tab, click <b>Testing Center Builder</b> in your bookmarks bar.",
+      build ? "Check what it says and click <b>Build it</b>: it makes your class's exam " + (names || "") + " with its questions and settings, then a copy for the Testing Center as “" + esc(name || "… Testing Center") + "” with testingcenterud@horacemann.org as its invigilator. The keys come back here."
+        : "Check what it found and click <b>Build it</b>: it copies " + (a.enSource.trim() ? "“" + esc(a.enSource.trim()) + "”" : "your class's exam") + " as “" + esc(name || "… Testing Center") + "”, sets its settings and gives testingcenterud@horacemann.org access as an invigilator. The key comes back here."
     ].map(function (t, i) { return "<li><b>" + (i + 1) + "</b>&nbsp;" + t + "</li>"; }).join("");
-    $("enManual").innerHTML = ["Duplicate " + (build ? "your class's exam" : "“" + (a.enSource.trim() || "your class's exam") + "”") + " as “" + (name || "… TC") + "”.", "In the copy's settings, turn the time limit off (and set the rest as above).", "Share it: give testingcenterud@horacemann.org Access.", "Copy the copy's exam key."]
+    $("enManual").innerHTML = ["Duplicate " + (build ? "your class's exam" : "“" + (a.enSource.trim() || "your class's exam") + "”") + " as “" + (name || "… Testing Center") + "”.", "In the copy's settings, turn the time limit off (and set the rest as above).", "Share it: give testingcenterud@horacemann.org Access.", "Copy the copy's exam key."]
       .map(function (t, i) { return "<li><b>" + (i + 1) + "</b>&nbsp;" + esc(t) + "</li>"; }).join("");
     $("enKey2").value = a.enKey || "";
     var p = examProblems(a), r = $("enResult");
@@ -1662,7 +1662,7 @@ function examNetBuilder() {
     if (p.length) { r.hidden = false; r.className = "tally warn"; r.textContent = p.join(" "); return; }
     db.builderV = db.builderV || BUILDER_V; save();
     window.open("https://exam.net/admin/exams#tcbuild=" + btoa(unescape(encodeURIComponent(JSON.stringify(enSpec(cur))))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""), "examnetBuild");
-    r.hidden = false; r.className = "tally"; r.textContent = "Waiting for the TC Builder in the Exam.net tab…";
+    r.hidden = false; r.className = "tally"; r.textContent = "Waiting for the Testing Center Builder in the Exam.net tab…";
   });
   function markBuilt(a, key, name) {
     a.enKey = key || a.enKey; if (name) a.enName = name;
