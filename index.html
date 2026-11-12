@@ -1928,6 +1928,13 @@ function examNetBuilder() {
   // Each student's individual exam key (Exam.net's key to resume an exam in
   // a later sitting: "examkey#123456", single use), sent by the bookmark from
   // the exam's Monitoring page to this page opened at #examnet-keys.
+  // A note across the top for a few seconds (never alert(): it stops the page).
+  function flash(text, warn) {
+    var old = $("flash"); if (old) old.remove();
+    var f = document.createElement("div"); f.id = "flash"; f.textContent = text;
+    f.style.cssText = "position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:50;max-width:min(680px,92vw);padding:10px 16px;border-radius:10px;font-weight:600;box-shadow:0 6px 24px var(--shadow);background:" + (warn ? "var(--attn-soft);color:var(--attn);border:1px solid var(--attn)" : "var(--ok-soft);color:var(--ok);border:1px solid var(--ok)");
+    document.body.appendChild(f); setTimeout(function () { f.remove(); }, 9000);
+  }
   function nameToks(n) { return String(n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z ]+/g, " ").split(" ").filter(Boolean); }
   function sameStudent(a, b) {
     var x = nameToks(a), y = nameToks(b);
@@ -1941,7 +1948,7 @@ function examNetBuilder() {
     var d = e.data, nm = String(d.exam || "").trim().toLowerCase();
     var a = db.exams.find(function (a) { return a.examNet && enExams(a).some(function (x) { return (x.name || "").trim().toLowerCase() === nm || (x.key && x.key === d.examKey); }); }) ||
       db.exams.find(function (a) { return (a.title || "").trim() && nm.indexOf(a.title.trim().toLowerCase()) === 0; });
-    if (!a) { alert("No assessment here matches “" + d.exam + "”. Give the assessment the exam's name in Exam.net (or type its exam key in), then send the keys again."); return; }
+    if (!a) { flash("No assessment here matches “" + d.exam + "”. Give an assessment the exam's name in Exam.net (or type its exam key in), then send the keys again.", true); return; }
     var hit = 0;
     a.students.forEach(function (s) {
       var m = d.students.filter(function (x) { return sameStudent(s.name, x.name); });
@@ -1949,7 +1956,7 @@ function examNetBuilder() {
     });
     save();
     if (cur === a) { drawStudents(); drawPreview(); } else location.hash = "exam/" + a.id;
-    setTimeout(function () { $("studentSummary").textContent = "Individual exam keys from “" + d.exam + "”: " + hit + " of " + a.students.length + " students matched by name"; }, 60);
+    flash("Individual exam keys from “" + d.exam + "”: " + hit + " of " + a.students.length + (a.students.length === 1 ? " student" : " students") + " here matched by name. Each key is on its student's row.", !hit);
   });
   if (window.opener && location.hash === "#examnet-keys") { try { window.opener.postMessage({ type: "scheduler-ready" }, "https://exam.net"); } catch (e) {} }
 
