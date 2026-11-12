@@ -51,12 +51,12 @@
   .page h2.big { font-size: 26px; margin-bottom: 14px; }
   .lead { color: var(--ink-soft); margin: 0 0 18px; }
 
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 4px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; align-items: start; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; text-align: left; display: flex; flex-direction: column; gap: 4px; }
   .card:hover { border-color: var(--maroon); }
   .card .t { font-family: "PT Serif", Georgia, serif; font-weight: 700; font-size: 17px; }
   .card .m { color: var(--ink-soft); font-size: 12.5px; }
-  .card.new { border-style: dashed; align-items: center; justify-content: center; color: var(--maroon); font-weight: 600; min-height: 96px; }
+  .card.new { cursor: pointer; border-style: dashed; align-items: center; justify-content: center; color: var(--maroon); font-weight: 600; min-height: 96px; }
   .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); }
   .pill.ok { background: var(--ok-soft); color: var(--ok); }
   .pill.warn { background: var(--attn-soft); color: var(--attn); }
@@ -64,7 +64,8 @@
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 460px); align-items: start; }
   @media (max-width: 1020px) { .layout { grid-template-columns: 1fr; } }
   .formcol { padding: 22px 26px 60px; min-width: 0; }
-  .previewcol { padding: 22px 26px 60px; background: var(--surface-2); border-left: 1px solid var(--line); min-height: calc(100vh - 70px); position: sticky; top: 0; }
+  .previewcol { padding: 22px 26px 40px; background: var(--surface-2); border-left: 1px solid var(--line); min-height: 100vh; position: sticky; top: 0; max-height: 100vh; overflow-y: auto; }
+  @media (max-width: 1020px) { .previewcol { position: static; max-height: none; min-height: 0; border-left: none; border-top: 1px solid var(--line); } }
   .titlerow { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
   .titlerow input { font-family: "PT Serif", Georgia, serif; font-size: 24px; font-weight: 700; border-color: transparent; background: transparent; padding: 2px 6px; }
   .titlerow input:hover { border-color: var(--line-strong); }
@@ -95,15 +96,19 @@
   .seg button + button { border-left: 1px solid var(--line-strong); }
   .seg button.on { background: var(--ink); color: var(--surface); }
 
-  .srow { display: grid; grid-template-columns: minmax(200px, 1fr) 58px minmax(250px, auto) 24px; grid-template-areas: "name grade extra x" "mk mk mk x" "cls cls sched x"; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg:not(.mk) { grid-area: extra; justify-self: start; } .srow > .mk { grid-area: mk; justify-self: start; } .srow > .x { grid-area: x; align-self: start; }
-  .srow > .cls { grid-area: cls; } .srow > .sched { grid-area: sched; }
+  .srow { display: grid; grid-template-columns: minmax(200px, 1fr) 58px minmax(170px, auto) 24px; grid-template-areas: "name grade extra x" "mid mid mid x" "sched sched sched x"; gap: 8px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .srow > .nm { grid-area: name; } .srow > .gr { grid-area: grade; } .srow > .seg { grid-area: extra; justify-self: start; } .srow > .x { grid-area: x; align-self: start; }
+  .srow > .mid { grid-area: mid; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; } .srow > .sched { grid-area: sched; }
   .srow.head { font-size: 12px; font-weight: 600; color: var(--ink-soft); padding-top: 0; }
   .srow input, .srow select { padding: 5px 7px; font-size: 13px; }
-  .srow .sched { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .srow .sched .what { font-size: 12.5px; }
-  .srow .sched .what.warn { color: var(--attn); font-weight: 600; }
-  .srow .cls { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-soft); }
+  .srow .sched { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: var(--paper); border-radius: 8px; padding: 8px 10px; }
+  .srow .sched .what { font-size: 13px; flex: 1 1 260px; }
+  .srow .sched .what .lbl { display: block; margin-bottom: 2px; }
+  .srow .sched .what .ln { display: block; font-weight: 600; }
+  .srow .sched .what .ln.warn { color: var(--attn); }
+  .srow .sched .what .key { font-weight: 400; color: var(--ink-soft); white-space: nowrap; }
+  .srow .sched .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .srow .cls { display: flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
   .srow .cls input { width: 134px; padding: 5px 4px; }
   .srow .cls select { width: 56px; padding: 5px 4px; }
   .srow .x { border: none; background: none; color: var(--ink-faint); font-size: 15px; }
@@ -117,7 +122,18 @@
   .sheet-nav .num { color: var(--ink-soft); font-size: 12.5px; min-width: 9ch; text-align: center; }
   .sheet-stack { display: flex; flex-direction: column; align-items: center; }
   .empty-note { font-size: 13px; color: var(--ink-faint); border: 1px dashed var(--line-strong); border-radius: 8px; padding: 22px; text-align: center; }
-  .bottom-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; align-items: stretch; }
+  .bottom-actions { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 18px; align-items: stretch; }
+  .subhead { font-size: 13px; font-weight: 600; color: var(--maroon); margin: 0 0 8px; display: flex; justify-content: space-between; gap: 10px; }
+  .subhead .sub { font-weight: 400; color: var(--ink-soft); font-size: 12.5px; }
+  .card { cursor: default; }
+  .card .open { cursor: pointer; display: flex; flex-direction: column; gap: 4px; border: none; background: none; padding: 0; text-align: left; }
+  .card .open:hover .t { color: var(--maroon); }
+  .card .en { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12.5px; display: flex; flex-direction: column; gap: 3px; }
+  .card .en .k { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .card .en .k .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); }
+  .card .en .k .num { font-weight: 600; cursor: pointer; }
+  .card .en .links { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .card .en a.btn { text-decoration: none; }
 
   /* The cover sheet (as in Testing Center Coversheets). */
   .sheet { background: #fff; color: #1C1B19; width: 100%; max-width: 440px; min-height: calc(440px * 11 / 8.5); box-shadow: 0 3px 14px var(--shadow); border-radius: 3px; padding: 5% 6%; font-family: "PT Serif", Georgia, serif; font-size: 9.5px; line-height: 1.35; display: flex; flex-direction: column; }
@@ -278,6 +294,33 @@
       </div>
     </div>
 
+    <div class="panel" id="coverPanel">
+      <div class="panel-title">On the Cover Sheet <span class="sub">What the Testing Center allows and how to give the test</span></div>
+      <div class="subhead">Special Instructions <span class="sub" id="specialSummary"></span></div>
+      <div class="check-grid-2col">
+        <label class="check-row"><input type="checkbox" data-k="siTextbook"> Use of textbook</label>
+        <label class="check-row"><input type="checkbox" data-k="siNotes"> Use of notes</label>
+        <label class="check-row"><input type="checkbox" data-k="siCalcGraphing"> Graphing calculator <span class="hint">(not provided)</span></label>
+        <label class="check-row"><input type="checkbox" data-k="siCalcScientific"> Scientific calculator <span class="hint">(not provided)</span></label>
+        <label class="check-row"><input type="checkbox" data-k="siCalc4fn"> 4-function calculator</label>
+        <label class="check-row"><input type="checkbox" data-k="siScrap"> Scrap paper <span class="hint">(provided)</span></label>
+        <label class="check-row"><input type="checkbox" data-k="siBluebook"> Blue book <span class="hint">(provided)</span></label>
+        <label class="check-row"><input type="checkbox" data-k="siRefSheets"> Reference sheets <span class="hint">(say which below)</span></label>
+        <label class="check-row"><input type="checkbox" data-k="siLaptopWith"> Laptop WITH internet/spell check</label>
+        <label class="check-row"><input type="checkbox" data-k="siLaptopWithout"> Laptop WITHOUT internet/spell check</label>
+        <label class="check-row"><input type="checkbox" data-k="siOtherOn"> Other:</label>
+      </div>
+      <div class="field" id="siOtherWrap" style="margin-top:8px"><label for="siOtherText">Other special instruction</label><input id="siOtherText" placeholder="e.g. Periodic table provided"></div>
+      <div class="field" style="margin-top:12px"><label for="siAdditional">Additional special instructions (optional)</label><input id="siAdditional" placeholder="Leave blank if none"></div>
+      <div class="subhead" style="margin-top:18px">Split Instructions <span class="sub" id="splitSummary"></span></div>
+      <div class="check-grid">
+        <label class="check-row"><input type="checkbox" data-k="splitConsecutive"> Assessment must be done in two consecutive periods only</label>
+        <label class="check-row"><input type="checkbox" data-k="splitOnePage"> Deliver test one page at a time (one-sided)</label>
+        <label class="check-row"><input type="checkbox" data-k="splitNoReturn"> Completed pages cannot be returned to student</label>
+      </div>
+      <div class="field" style="margin-top:12px"><label for="splitOther">Other split instructions (optional)</label><input id="splitOther" placeholder="Leave blank if none"></div>
+    </div>
+
     <div class="panel" id="examNetPanel">
       <div class="panel-title">Exam.net <span class="seg" id="enSeg"><button type="button" data-v="no">Not Exam.net</button><button type="button" data-v="yes">Exam.net</button></span></div>
       <div id="enBody">
@@ -287,7 +330,7 @@
             <div class="field"><label>Its name in Exam.net</label><span class="note" id="enClassNameShow"></span></div>
             <div class="field"><label>One for each class <span class="hint">(optional: adds “ - D” and so on to the name)</span></label><span class="seg" id="enPeriodSeg"></span></div>
           </div>
-          <div class="qhead"><span class="lbl">The Exam</span><span class="note" id="qTally"></span></div>
+          <div class="qhead"><span class="lbl">The Exam <span class="note" id="qTally" style="font-weight:400;margin-left:6px"></span></span><button class="btn btn-sm" id="qHide" type="button">Hide the prompt</button></div>
           <div id="qList"></div>
           <div class="addrow" id="qAdd">
             <button class="btn btn-sm" type="button" data-q="info">+ Instructions or a passage</button>
@@ -318,38 +361,9 @@
           <label class="check-row"><input type="checkbox" id="enTimeLimit"> Has its time limit turned off</label>
           <label class="check-row"><input type="checkbox" id="enCoTeacher"> Has testingcenterud@horacemann.org as an invigilator (Access)</label>
         </div>
-        <div class="addrow"><button class="btn btn-primary" id="enBuild" type="button">Build it in Exam.net…</button><span class="note" id="enBuilt"></span></div>
+        <div class="addrow"><button class="btn btn-primary" id="enBuild" type="button">Build it in Exam.net…</button><button class="btn" id="enGetKeys" type="button" title="For exams already in Exam.net: reads their exam keys from your exam list and puts them here, on each student's row and on the home page. Nothing in Exam.net changes.">Get the exam keys from Exam.net</button><span class="note" id="enBuilt"></span></div>
       </div>
     </div>
-
-    <details class="panel" id="specialPanel">
-      <summary><div class="panel-title">Special Instructions <span class="sub" id="specialSummary"></span></div></summary>
-      <div class="check-grid-2col">
-        <label class="check-row"><input type="checkbox" data-k="siTextbook"> Use of textbook</label>
-        <label class="check-row"><input type="checkbox" data-k="siNotes"> Use of notes</label>
-        <label class="check-row"><input type="checkbox" data-k="siCalcGraphing"> Graphing calculator <span class="hint">(not provided)</span></label>
-        <label class="check-row"><input type="checkbox" data-k="siCalcScientific"> Scientific calculator <span class="hint">(not provided)</span></label>
-        <label class="check-row"><input type="checkbox" data-k="siCalc4fn"> 4-function calculator</label>
-        <label class="check-row"><input type="checkbox" data-k="siScrap"> Scrap paper <span class="hint">(provided)</span></label>
-        <label class="check-row"><input type="checkbox" data-k="siBluebook"> Blue book <span class="hint">(provided)</span></label>
-        <label class="check-row"><input type="checkbox" data-k="siRefSheets"> Reference sheets <span class="hint">(say which below)</span></label>
-        <label class="check-row"><input type="checkbox" data-k="siLaptopWith"> Laptop WITH internet/spell check</label>
-        <label class="check-row"><input type="checkbox" data-k="siLaptopWithout"> Laptop WITHOUT internet/spell check</label>
-        <label class="check-row"><input type="checkbox" data-k="siOtherOn"> Other:</label>
-      </div>
-      <div class="field" id="siOtherWrap" style="margin-top:8px"><label for="siOtherText">Other special instruction</label><input id="siOtherText" placeholder="e.g. Periodic table provided"></div>
-      <div class="field" style="margin-top:12px"><label for="siAdditional">Additional special instructions (optional)</label><input id="siAdditional" placeholder="Leave blank if none"></div>
-    </details>
-
-    <details class="panel" id="splitPanel">
-      <summary><div class="panel-title">Split Instructions <span class="sub" id="splitSummary"></span></div></summary>
-      <div class="check-grid">
-        <label class="check-row"><input type="checkbox" data-k="splitConsecutive"> Assessment must be done in two consecutive periods only</label>
-        <label class="check-row"><input type="checkbox" data-k="splitOnePage"> Deliver test one page at a time (one-sided)</label>
-        <label class="check-row"><input type="checkbox" data-k="splitNoReturn"> Completed pages cannot be returned to student</label>
-      </div>
-      <div class="field" style="margin-top:12px"><label for="splitOther">Other split instructions (optional)</label><input id="splitOther" placeholder="Leave blank if none"></div>
-    </details>
 
     <details class="panel">
       <summary><div class="panel-title">Attach the Test <span class="sub" id="attachSummary">Optional</span></div></summary>
@@ -362,16 +376,18 @@
   <div class="previewcol">
     <h2>Cover Sheets</h2>
     <div class="preview-note" id="previewNote">One for each Testing Center sitting.</div>
-    <div class="sheet-nav" id="sheetNav">
-      <button class="btn btn-sm" id="prevSheet" type="button">‹ Previous</button>
-      <span id="sheetPager" class="num">0 of 0</span>
-      <button class="btn btn-sm" id="nextSheet" type="button">Next ›</button>
-    </div>
-    <div class="sheet-stack" id="previewStack"></div>
     <div class="bottom-actions">
       <button class="btn btn-primary btn-lg" id="printSheets" type="button">Print all cover sheets</button>
-      <button class="btn btn-lg" id="openAllForms" type="button">Open and fill all Testing Center forms</button>
-      <button class="btn btn-sm" id="openForms" type="button" style="align-self:center">One at a time…</button>
+      <button class="btn btn-lg" id="openForms" type="button">Fill the Testing Center's forms…</button>
+      <button class="btn" id="togglePreview" type="button">Show the preview</button>
+    </div>
+    <div id="previewWrap" hidden>
+      <div class="sheet-nav" id="sheetNav">
+        <button class="btn btn-sm" id="prevSheet" type="button">‹ Previous</button>
+        <span id="sheetPager" class="num">0 of 0</span>
+        <button class="btn btn-sm" id="nextSheet" type="button">Next ›</button>
+      </div>
+      <div class="sheet-stack" id="previewStack"></div>
     </div>
   </div>
 </div>
@@ -413,12 +429,13 @@
 <!-- Google Form -->
 <dialog class="modal" id="formBox">
   <div class="modal-inner">
-    <div class="modal-head"><h2>Fill the Testing Center Form</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
+    <div class="modal-head"><h2 id="formTitle">Fill the Testing Center's Forms</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
     <p class="note" style="margin:0">The Testing Center's form takes one sitting at a time, so each sitting gets its own tab of the real form with its answers filled in. In each tab: check it, attach the test on the last page and press Submit. Don't reload a tab before you submit it (Google can put another tab's answers back in); if one shows the wrong student, click Clear form at its foot and open it again from here.</p>
     <div id="formPopNote" class="warnbox" hidden></div>
     <div id="formWarn" class="warnbox" hidden></div>
     <ul class="gf-list" id="formList"></ul>
-    <div class="modal-actions"><button class="btn" type="button" data-close>Done</button><button class="btn" id="formNext" type="button">Open next</button><button class="btn btn-primary" id="formAll" type="button">Open all</button></div>
+    <p class="hint" style="margin:10px 0 0" id="formAllHint">Chrome opens one tab a click. <b>Open next</b> always works; <b>Open all at once</b> needs pop-ups allowed for this page (once).</p>
+    <div class="modal-actions"><button class="btn" type="button" data-close>Done</button><button class="btn" id="formAll" type="button">Open all at once</button><button class="btn btn-primary" id="formNext" type="button">Open next</button></div>
   </div>
 </dialog>
 
@@ -456,7 +473,7 @@
    Exam Scheduler tab (postMessage). No comments of the // kind in here:
    it becomes a javascript: URL. */
 function examNetBuilder() {
-  var V = 2, OK_FROM = ["https://jakegoldwasser.github.io", "http://localhost:8765"];
+  var V = 3, OK_FROM = ["https://jakegoldwasser.github.io", "http://localhost:8765"];
   var old = document.getElementById("tcb-panel"); if (old) old.remove();
   var P = document.createElement("div"); P.id = "tcb-panel";
   P.style.cssText = "position:fixed;top:14px;right:14px;z-index:2147483647;width:410px;max-height:92vh;overflow:auto;background:#fff;color:#1c1b19;border:2px solid #7A1F2E;border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.32);font:14px/1.45 -apple-system,Helvetica,Arial,sans-serif;padding:16px 18px;text-align:left";
@@ -488,6 +505,22 @@ function examNetBuilder() {
   });
   function norm(s) { return String(s || "").trim().toLowerCase().replace(/\s+/g, " "); }
   function byName(n) { return rows.find(function (r) { return norm(r.name) === norm(n); }); }
+  if (spec.keys) {
+    var want = spec.keys.names.map(function (n) { return { name: n, row: byName(n) || rows.find(function (r) { return /^[A-Za-z0-9]{6}$/.test(n) && r.key.toLowerCase() === n.toLowerCase(); }) }; });
+    var tcRow = byName(spec.name) || byName(spec.name.replace(/ Testing Center$/, " TC"));
+    say("Exam keys for the Exam Scheduler:", "font-weight:600");
+    var ulk = el("ul", "margin:2px 0 0;padding-left:20px;font-size:13px");
+    want.forEach(function (w) { ulk.appendChild(el("li", "", w.row ? w.row.name + " · " + w.row.key : "“" + w.name + "”: not in this list")); });
+    ulk.appendChild(el("li", "", tcRow ? tcRow.name + " · " + tcRow.key : "“" + spec.name + "”: not in this list"));
+    P.appendChild(ulk);
+    var found = want.filter(function (w) { return w.row; }).map(function (w) { return { name: w.row.name, key: w.row.key, id: w.row.id }; });
+    if (!found.length && !tcRow) { say(rows.length ? "None of them are in this list. Are they in a folder or the archive? Open that, then click Testing Center Builder again." : "There are no exams in this list.", "color:#93630F"); return; }
+    var sentK = false;
+    if (window.opener && OK_FROM.indexOf(spec.from) >= 0) { try { window.opener.postMessage({ type: "tcbuild-keys", aid: spec.aid, classExams: found, tc: tcRow ? { name: tcRow.name, key: tcRow.key, id: tcRow.id } : null }, spec.from); sentK = true; } catch (e) {} }
+    say(sentK ? "They're in the Exam Scheduler now." : "Couldn't reach the Exam Scheduler tab: type them in there.", "font-size:13px;color:" + (sentK ? "#2F6B3A" : "#93630F"));
+    P.appendChild(btn("Done", true, function () { history.replaceState(null, "", "/admin/exams"); P.remove(); }));
+    return;
+  }
   var B = spec.build, sel = null, src = null;
   var existing = byName(spec.name);
   var classOld = B ? B.names.map(byName) : [];
@@ -657,7 +690,7 @@ function examNetBuilder() {
       var k = el("div", "font:600 30px ui-monospace,Menlo,monospace;letter-spacing:.06em;margin:6px 0;color:#7A1F2E", g2.examkey); P.appendChild(k);
       say(problems.length ? "Check these in Exam.net: " + problems.join("; ") + "." : "All set: questions and settings saved, and the Testing Center has access.", problems.length ? "color:#93630F" : "color:#2F6B3A");
       var sent = false;
-      if (window.opener && OK_FROM.indexOf(spec.from) >= 0) { try { window.opener.postMessage({ type: "tcbuild-done", aid: spec.aid, key: g2.examkey, name: g2.name, examId: id, classExams: made.map(function (x) { return { name: x.name, key: x.key }; }), problems: problems }, spec.from); sent = true; } catch (e) {} }
+      if (window.opener && OK_FROM.indexOf(spec.from) >= 0) { try { window.opener.postMessage({ type: "tcbuild-done", aid: spec.aid, key: g2.examkey, name: g2.name, examId: id, classExams: made.map(function (x) { return { name: x.name, key: x.key, id: x.id }; }), problems: problems }, spec.from); sent = true; } catch (e) {} }
       try { await navigator.clipboard.writeText(g2.examkey); } catch (e) {}
       say(sent ? "The keys are in the Exam Scheduler now (and the copy's is copied)." : "The copy's exam key is copied: paste it into the Exam Scheduler.", "font-size:13px;color:#57534A");
       if (made.length) P.appendChild(btn("See your class's exam", false, function () { location.href = "/admin/exam-creator/" + made[0].id + "/edit"; }));
@@ -807,6 +840,28 @@ function examNetBuilder() {
     });
     return out;
   }
+  // The exam key a student types with their class: the exam made for their
+  // period ("name - D"), else the one class exam.
+  function classKey(a, s) {
+    var built = a.enClassBuilt || [], hit = built.find(function (x) { return new RegExp(" - " + s.classPeriod + "$").test(x.name); }) || (built.length === 1 ? built[0] : null);
+    if (hit && hit.key) return hit.key;
+    var src = (a.enSource || "").trim();
+    return a.enMode !== "build" && /^[A-Za-z0-9]{6}$/.test(src) ? src : "";
+  }
+  // When one student takes it, line by line: with their class, then each
+  // Testing Center sitting (and the exam key for each, if it's on Exam.net).
+  function takes(a, s) {
+    var ck = a.examNet ? classKey(a, s) : "", tk = a.examNet ? (a.enKey || "").trim() : "", out = [];
+    if (!needsTC(a, s)) return [{ text: s.classDate ? shortDay(s.classDate) + " · " + periodName(s.classPeriod) + ", with the class" : "With the class (pick the class's day)", key: ck }];
+    if (classPart(a, s)) out.push({ text: shortDay(s.classDate) + " · " + periodName(s.classPeriod) + ", with the class (" + classMin(a, s) + " min)", key: ck });
+    var sits = sittings(a, s), short = needMin(a, s) - scheduledMin(a, s);
+    if (sits[0].unscheduled) out.push({ text: "Testing Center: " + sits[0].mins + " min not scheduled yet", warn: true });
+    else {
+      sits.forEach(function (x) { out.push({ text: shortDay(x.date) + " · " + x.parts.map(function (p) { return periodName(p.period); }).join(" + ") + ", in the Testing Center (" + x.mins + " min)", key: tk }); });
+      if (short > 0) out.push({ text: short + " min still to schedule", warn: true });
+    }
+    return out;
+  }
   function allSittings(a) { var out = []; a.students.forEach(function (s) { out = out.concat(sittings(a, s)); }); return out; }
 
   function remember(s) {
@@ -866,14 +921,47 @@ function examNetBuilder() {
     nb.addEventListener("click", function () { var a = newExam(); db.exams.unshift(a); save(); location.hash = "exam/" + a.id; setTimeout(function () { $("aTitle").focus(); }, 30); });
     box.appendChild(nb);
     db.exams.slice().sort(function (x, y) { return firstDate(y).localeCompare(firstDate(x)) || y.created - x.created; }).forEach(function (a) {
-      var c = document.createElement("button"); c.type = "button"; c.className = "card";
+      var c = document.createElement("div"); c.className = "card";
+      var o = document.createElement("button"); o.type = "button"; o.className = "open"; o.title = "Open this assessment";
       var sits = allSittings(a), uns = sits.filter(function (x) { return x.unscheduled; }).length;
-      c.innerHTML = '<span class="t">' + esc(a.title || "Untitled assessment") + '</span><span class="m">' + esc([a.subject, examWhen(a)].filter(Boolean).join(" · ")) + '</span>' +
-        '<span>' + (sits.length ? '<span class="pill ' + (uns ? "warn" : "ok") + '">' + (uns ? uns + " to schedule" : sits.length + (sits.length === 1 ? " sitting" : " sittings") + " scheduled") + '</span> ' : '<span class="pill">No one in the Testing Center</span> ') +
-        (a.examNet ? '<span class="pill' + (a.enKey ? " ok" : "") + '">Exam.net' + (a.enKey ? " · " + esc(a.enKey) : "") + '</span>' : "") + '</span>';
-      c.addEventListener("click", function () { location.hash = "exam/" + a.id; });
+      o.innerHTML = '<span class="t">' + esc(a.title || "Untitled assessment") + '</span><span class="m">' + esc([a.subject, examWhen(a)].filter(Boolean).join(" · ")) + '</span>' +
+        '<span>' + (sits.length ? '<span class="pill ' + (uns ? "warn" : "ok") + '">' + (uns ? uns + " to schedule" : sits.length + (sits.length === 1 ? " sitting" : " sittings") + " scheduled") + '</span> ' : '<span class="pill">No one in the Testing Center</span> ') + '</span>';
+      o.addEventListener("click", function () { location.hash = "exam/" + a.id; });
+      c.appendChild(o);
+      if (a.examNet) c.appendChild(enCard(a));
       box.appendChild(c);
     });
+  }
+
+  // A card's Exam.net details: each exam's name and key (click a key to
+  // copy it), and the way into Exam.net.
+  function enExams(a) {
+    var built = a.enClassBuilt || [], names = a.enMode === "build" ? enClassNames(a) : [srcName(a)].filter(Boolean);
+    var list = built.length ? built.map(function (x) { return { label: "Class", name: x.name, key: x.key, id: x.id }; }) : names.map(function (n) { var isKey = a.enMode !== "build" && /^[A-Za-z0-9]{6}$/.test(n); return { label: "Class", name: isKey ? "Your class's exam" : n, key: isKey ? n : "" }; });
+    list.push({ label: "Testing Center", name: tcName(a) || "Testing Center copy", key: (a.enKey || "").trim(), id: a.enTcId });
+    return list;
+  }
+  function enCard(a) {
+    var d = document.createElement("div"); d.className = "en";
+    d.innerHTML = '<span class="lbl">Exam.net</span>';
+    var first = null;
+    enExams(a).forEach(function (x) {
+      if (x.id && !first) first = x;
+      var r = document.createElement("div"); r.className = "k";
+      r.innerHTML = '<span class="nm" title="' + esc(x.label + ": " + x.name) + '">' + esc(x.name) + "</span>";
+      if (x.key) {
+        var k = document.createElement("span"); k.className = "num"; k.textContent = x.key; k.title = "The exam key students type in. Click to copy it.";
+        k.addEventListener("click", function () { try { navigator.clipboard.writeText(x.key); k.textContent = "Copied"; setTimeout(function () { k.textContent = x.key; }, 900); } catch (e) {} });
+        r.appendChild(k);
+      } else r.insertAdjacentHTML("beforeend", '<span class="hint">no key yet</span>');
+      d.appendChild(r);
+    });
+    var links = document.createElement("div"); links.className = "links";
+    function link(text, href, title) { var l = document.createElement("a"); l.className = "btn btn-sm"; l.textContent = text; l.href = href; l.target = "_blank"; l.rel = "noopener"; l.title = title; links.appendChild(l); }
+    link("Exams and monitoring", "https://exam.net/admin/exams", "Opens your exam list in Exam.net: each exam's row there has Monitor, Results and Share");
+    if (first) link("Edit the exam", "https://exam.net/admin/exam-creator/" + first.id + "/edit", "Opens “" + first.name + "” in Exam.net's editor");
+    d.appendChild(links);
+    return d;
   }
 
   // Coming Up: every Testing Center sitting, by day.
@@ -926,6 +1014,7 @@ function examNetBuilder() {
   bind("aTitle", "title"); bind("aSubject", "subject"); bind("aKind", "kind"); bind("aTime", "timeGiven", true);
   bind("aGrade", "grade");
   bind("enSource", "enSource"); bind("enName", "enName"); bind("enKey", "enKey");
+  ["enSource", "enKey"].forEach(function (id) { $(id).addEventListener("change", function () { if (cur) drawStudents(); }); });
   bind("siOtherText", "siOtherText"); bind("siAdditional", "siAdditional"); bind("splitOther", "splitOther");
   ["enCopy", "enTimeLimit", "enCoTeacher"].forEach(function (k) { $(k).addEventListener("change", function () { if (!cur) return; cur[k] = this.checked; save(); drawPreview(); }); });
   document.querySelectorAll("#examPage input[data-k]").forEach(function (el) {
@@ -981,12 +1070,15 @@ function examNetBuilder() {
       });
       var grade = document.createElement("select"); grade.className = "gr"; grade.title = "Grade"; grade.innerHTML = "<option>9</option><option>10</option><option>11</option><option>12</option>"; grade.value = s.grade;
       grade.addEventListener("change", function () { s.grade = grade.value; s.touched = true; remember(s); save(); drawPreview(); });
-      var cls = document.createElement("div"); cls.className = "cls";
+      // Their class's day and period. A date field's "change" fires at every
+      // digit typed, so nothing here may redraw the row (it would take the
+      // cursor out of the field halfway through "12").
+      var cls = document.createElement("label"); cls.className = "cls";
       var cd = document.createElement("input"); cd.type = "date"; cd.value = s.classDate || ""; cd.title = "The day their class takes it";
       var cp = document.createElement("select"); cp.innerHTML = letterOpts; cp.value = s.classPeriod || "A"; cp.title = "Their class's period";
-      cd.addEventListener("change", function () { s.classDate = cd.value; a.classDate = cd.value; save(); drawStudents(); drawPreview(); });
-      cp.addEventListener("change", function () { s.classPeriod = cp.value; s.periodSet = true; a.classPeriod = cp.value; remember(s); save(); drawStudents(); drawPreview(); });
-      cls.appendChild(document.createTextNode("Class:")); cls.title = "When their class takes it"; cls.appendChild(cd); cls.appendChild(cp);
+      cd.addEventListener("change", function () { s.classDate = cd.value; a.classDate = cd.value; save(); fillSched(); drawPreview(); });
+      cp.addEventListener("change", function () { s.classPeriod = cp.value; s.periodSet = true; a.classPeriod = cp.value; remember(s); save(); fillSched(); drawPreview(); });
+      cls.appendChild(document.createTextNode("Their class takes it")); cls.title = "When their class takes it (not when this student does: that's below)"; cls.appendChild(cd); cls.appendChild(cp);
       var extra = document.createElement("span"); extra.className = "seg"; extra.title = "Extra time";
       [["none", "None"], ["1.5", "1.5×"], ["2", "2×"]].forEach(function (o) {
         var b = document.createElement("button"); b.type = "button"; b.textContent = o[1]; b.className = s.extra === o[0] ? "on" : "";
@@ -1004,21 +1096,34 @@ function examNetBuilder() {
         });
         mk.appendChild(b);
       });
+      var mid = document.createElement("div"); mid.className = "mid"; mid.appendChild(mk); mid.appendChild(cls);
+      // When this student takes it: with the class, then each Testing Center
+      // sitting, each with the exam key they type in there.
       var sched = document.createElement("div"); sched.className = "sched";
-      var what = document.createElement("span"); what.className = "what";
-      if (!needsTC(a, s)) { what.textContent = "With the class (no extra time)"; sched.appendChild(what); }
-      else {
-        var sits = sittings(a, s), short = needMin(a, s) - scheduledMin(a, s);
-        if (sits[0].unscheduled) { what.textContent = "Not scheduled yet"; what.classList.add("warn"); }
-        else what.innerHTML = sits.map(function (x) { return esc(shortDay(x.date)) + " · " + x.parts.map(function (p) { return esc(p.period); }).join(" + ") + " (" + x.mins + " min)"; }).join("<br>") +
-          (short > 0 ? '<br><span class="hint" style="color:var(--attn)">' + short + " min short</span>" : "");
-        var sb = document.createElement("button"); sb.type = "button"; sb.className = "btn btn-sm"; sb.textContent = sits[0].unscheduled ? "Schedule" : "Change";
-        sb.addEventListener("click", function () { openSched(s); });
-        sched.appendChild(what); sched.appendChild(sb);
+      function fillSched() {
+        sched.innerHTML = "";
+        var what = document.createElement("span"); what.className = "what";
+        what.innerHTML = '<span class="lbl">When this student takes it</span>' + takes(a, s).map(function (l) {
+          return '<span class="ln' + (l.warn ? " warn" : "") + '">' + esc(l.text) + (l.key ? ' <span class="key">· exam key <span class="num">' + esc(l.key) + "</span></span>" : "") + "</span>";
+        }).join("");
+        sched.appendChild(what);
+        if (!needsTC(a, s)) return;
+        var sits = sittings(a, s), acts = document.createElement("span"); acts.className = "acts";
+        function act(text, title, fn, primary) { var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-sm" + (primary ? " btn-primary" : ""); b.textContent = text; b.title = title; b.addEventListener("click", fn); acts.appendChild(b); }
+        var who = s.name.trim() || "this student";
+        act(sits[0].unscheduled ? "Schedule Testing Center time" : "Change Testing Center time", sits[0].unscheduled ? "Pick the periods " + who + " is in the Testing Center" : "Change the periods " + who + " is in the Testing Center", function () { openSched(s); }, sits[0].unscheduled);
+        act("Print cover sheet", "Print just " + who + "'s cover sheet" + (sits.length > 1 ? "s (" + sits.length + ")" : ""), function () { printSits(sittings(a, s)); });
+        act("Fill form", "Open the Testing Center's form filled in for " + who, function () {
+          var mine = sittings(a, s);
+          if (mine.length === 1) { openForm(mine[0]); return; }
+          formOnly = s.id; drawForms(); $("formBox").showModal();
+        });
+        sched.appendChild(acts);
       }
+      fillSched();
       var x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.title = "Remove this student from this assessment";
       x.addEventListener("click", function () { a.students = a.students.filter(function (y) { return y !== s; }); save(); drawStudents(); drawPreview(); });
-      [name, grade, cls, extra, mk, sched, x].forEach(function (n) { row.appendChild(n); });
+      [name, grade, extra, mid, sched, x].forEach(function (n) { row.appendChild(n); });
       box.appendChild(row);
     });
     var tc = a.students.filter(function (s) { return needsTC(a, s); }).length;
@@ -1079,7 +1184,7 @@ function examNetBuilder() {
   }
   function drawSched() {
     var a = cur, s = editing.s, box = $("schedParts"); box.innerHTML = "";
-    $("schedTitle").textContent = "Schedule " + (s.name.trim() || "this student");
+    $("schedTitle").textContent = "Testing Center Time for " + (s.name.trim() || "This Student");
     var need = needMin(a, s);
     $("schedNeed").textContent = (s.makeup ? "A make-up" : "Extra time") + ": " + need + " minutes in all (" + (a.timeGiven || 0) + " min" + (mult(s) > 1 ? " × " + s.extra : "") + ").";
     var n = 0;
@@ -1097,7 +1202,7 @@ function examNetBuilder() {
       var row = document.createElement("div"); row.className = "part";
       row.innerHTML = '<span class="pn">' + (++n) + "</span>";
       var d = document.createElement("input"); d.type = "date"; d.value = p.date;
-      d.addEventListener("change", function () { p.date = d.value; drawSched(); });
+      d.addEventListener("change", function () { p.date = d.value; when.textContent = whenText(p); drawTally(); });
       var per = document.createElement("select"); per.innerHTML = periodOpts; per.value = p.period;
       per.addEventListener("change", function () { p.period = per.value; drawSched(); });
       var len = document.createElement("div"); len.className = "len";
@@ -1238,6 +1343,7 @@ function examNetBuilder() {
     var sits = allSittings(cur), n = sits.length, st = $("previewStack");
     previewIndex = Math.max(0, Math.min(previewIndex, n - 1));
     st.innerHTML = ""; $("sheetNav").hidden = n < 2;
+    $("previewWrap").hidden = !db.showPreview; $("togglePreview").textContent = db.showPreview ? "Hide the preview" : "Show the preview";
     if (!n) st.innerHTML = '<div class="empty-note">Add a student with extra time, or a make-up, to see their cover sheet here.</div>';
     else {
       st.appendChild(buildSheet(sits[previewIndex]));
@@ -1246,12 +1352,14 @@ function examNetBuilder() {
       if (at) { var b = document.createElement("div"); b.className = "pill"; b.style.marginTop = "10px"; b.textContent = "+ " + at.pages.length + " test pages print after it"; st.appendChild(b); }
     }
     $("prevSheet").disabled = previewIndex <= 0; $("nextSheet").disabled = previewIndex >= n - 1;
-    $("printSheets").disabled = $("openForms").disabled = $("openAllForms").disabled = !n;
+    $("printSheets").disabled = $("openForms").disabled = !n;
     $("previewNote").textContent = n ? n + (n === 1 ? " cover sheet" : " cover sheets") + ", one for each Testing Center sitting." : "One for each Testing Center sitting.";
   }
-  $("printSheets").addEventListener("click", function () {
-    var sits = allSittings(cur), pa = $("printArea"), at = attachments[cur.id];
-    if (sits.some(function (x) { return x.unscheduled; }) && !confirm("Some students aren't scheduled yet: their sheets will have no date. Print anyway?")) return;
+  $("togglePreview").addEventListener("click", function () { db.showPreview = !db.showPreview; save(); drawPreview(); });
+  function printSits(sits) {
+    var pa = $("printArea"), at = attachments[cur.id];
+    if (!sits.length) return;
+    if (sits.some(function (x) { return x.unscheduled; }) && !confirm(sits.length === 1 ? "This student isn't scheduled yet: the sheet will have no date. Print anyway?" : "Some students aren't scheduled yet: their sheets will have no date. Print anyway?")) return;
     pa.innerHTML = "";
     sits.forEach(function (x) {
       pa.appendChild(buildSheet(x));
@@ -1259,7 +1367,8 @@ function examNetBuilder() {
     });
     if (pa.lastElementChild) pa.lastElementChild.style.breakAfter = "auto";
     window.print();
-  });
+  }
+  $("printSheets").addEventListener("click", function () { printSits(allSittings(cur)); });
 
   // ---------------------------------------------------------------
   // The Testing Center's Google Form, pre-filled (from Testing Center
@@ -1319,40 +1428,44 @@ function examNetBuilder() {
     w.push(attachments[a.id] ? "Attach " + attachments[a.id].fileName + " on the form's last page." : "If you're sending the test as a file, attach it on the form's last page.");
     return w;
   }
-  var opened = {};
+  var opened = {}, formOnly = null; // formOnly: one student's id, or null for everyone
   function sitKey(x) { return x.s.id + "|" + x.date; }
+  function formSits() { return allSittings(cur).filter(function (x) { return !formOnly || x.s.id === formOnly; }); }
   function drawForms() {
-    var sits = allSittings(cur), w = formWarnings();
+    var sits = formSits(), w = formWarnings();
+    var one = formOnly && cur.students.find(function (s) { return s.id === formOnly; });
+    $("formTitle").textContent = one ? "Fill the Forms for " + (one.name.trim() || "This Student") : "Fill the Testing Center's Forms";
     $("formWarn").hidden = !w.length;
     $("formWarn").innerHTML = "<strong>Before you submit:</strong><ul>" + w.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
     var list = $("formList"); list.innerHTML = "";
     sits.forEach(function (x) {
       var li = document.createElement("li"); if (opened[sitKey(x)]) li.className = "done";
-      li.innerHTML = '<span class="gf-name">' + esc(x.s.name || "Unnamed student") + ' <span class="gf-meta">' + esc(x.unscheduled ? "not scheduled" : shortDay(x.date) + " · " + x.parts.map(function (p) { return p.period; }).join(" + ")) + "</span></span>";
+      li.innerHTML = '<span class="gf-name">' + esc(x.s.name || "Unnamed student") + ' <span class="gf-meta">' + esc(x.unscheduled ? "not scheduled" : shortDay(x.date) + " · " + x.parts.map(function (p) { return p.period; }).join(" + ")) + (opened[sitKey(x)] ? " · opened" : "") + "</span></span>";
       var b = document.createElement("button"); b.type = "button"; b.className = "btn btn-sm"; b.textContent = opened[sitKey(x)] ? "Open again" : "Open form";
       b.addEventListener("click", function () { openForm(x); });
       li.appendChild(b); list.appendChild(li);
     });
-    var next = sits.find(function (x) { return !opened[sitKey(x)]; });
-    $("formNext").disabled = !next; $("formNext").textContent = next ? "Open next: " + (next.s.name || "unnamed student") : "All opened";
+    var left = sits.filter(function (x) { return !opened[sitKey(x)]; }), next = left[0];
+    $("formNext").disabled = !next; $("formNext").textContent = next ? "Open next: " + (next.s.name || "unnamed student") + (sits.length > 1 ? " (" + (sits.length - left.length + 1) + " of " + sits.length + ")" : "") : "All opened";
+    $("formAll").hidden = $("formAllHint").hidden = sits.length < 2;
   }
   function openForm(x) { var w = window.open(formUrl(x), "_blank"); if (w) { try { w.opener = null; } catch (e) {} opened[sitKey(x)] = true; } drawForms(); return !!w; }
-  // Every sitting's form at once, each in its own tab. Chrome lets a page open
-  // only one tab per click until pop-ups are allowed for it, so say so.
+  // Every form at once, each in its own tab. Chrome lets a page open one
+  // tab per click until pop-ups are allowed for it: the rest are counted
+  // and stay in the list, where Open next takes them one click at a time.
   function openAll() {
-    var sits = allSittings(cur), todo = sits.filter(function (x) { return !opened[sitKey(x)]; });
+    var sits = formSits(), todo = sits.filter(function (x) { return !opened[sitKey(x)]; });
     if (!todo.length) todo = sits;
     var blocked = 0;
     todo.forEach(function (x) { if (!openForm(x)) blocked++; });
-    drawForms(); $("formBox").open || $("formBox").showModal();
+    drawForms();
     var n = $("formPopNote");
     n.hidden = !blocked;
-    n.innerHTML = blocked ? "<strong>Chrome stopped " + blocked + (blocked === 1 ? " form" : " forms") + " opening.</strong> Click the blocked pop-up icon at the right of the address bar, choose <b>Always allow pop-ups</b> for this page, then click <b>Open all</b> again." : "";
+    n.innerHTML = blocked ? "<strong>Chrome opened " + (todo.length - blocked) + " of " + todo.length + " and stopped the other " + blocked + ".</strong> It allows one new tab a click. Either keep clicking <b>Open next</b> below (one form each), or allow them all: click the pop-up icon at the right end of the address bar, choose <b>Always allow pop-ups and redirects</b>, click Done there, then <b>Open all at once</b> again." : "";
   }
-  $("openAllForms").addEventListener("click", openAll);
   $("formAll").addEventListener("click", openAll);
-  $("openForms").addEventListener("click", function () { drawForms(); $("formBox").showModal(); });
-  $("formNext").addEventListener("click", function () { var x = allSittings(cur).find(function (y) { return !opened[sitKey(y)]; }); if (x) openForm(x); });
+  $("openForms").addEventListener("click", function () { formOnly = null; $("formPopNote").hidden = true; drawForms(); $("formBox").showModal(); });
+  $("formNext").addEventListener("click", function () { var x = formSits().find(function (y) { return !opened[sitKey(y)]; }); if (x) openForm(x); });
 
   // ---------------------------------------------------------------
   // Exam.net: the Testing Center copy's settings, as Exam.net's own
@@ -1389,7 +1502,7 @@ function examNetBuilder() {
       ["screenMonitoring", "Screen monitoring", ONOFF]]]
   ];
   var REQS = [["firstName", "First name"], ["lastName", "Last name"], ["email", "Email"], ["class", "Class"], ["teacher", "Teacher name"], ["phone", "Phone number"], ["studentId", "Student number"]];
-  var BUILDER_V = 2;
+  var BUILDER_V = 3;
   function enSetOf(a) { if (!a.enSet) a.enSet = Object.assign({ timeLimit: "off", lockdown: "high" }, db.enDefaults || {}); return a.enSet; }
   function classSetOf(a) { if (!a.classSet) a.classSet = Object.assign({}, db.classDefaults || {}); return a.classSet; }
   // Draws ENSET into box. kind "tc": blank = as in the class's exam;
@@ -1563,12 +1676,16 @@ function examNetBuilder() {
       box.appendChild(card);
     });
     if (!a.questions.length) box.innerHTML = '<div class="empty-note" style="margin-top:10px">Add the prompt, a passage or questions below. For an essay, add a written answer with the prompt in it.</div>';
+    box.hidden = $("qAdd").hidden = !!a.hideExam;
+    $("qHide").textContent = a.hideExam ? "Show the prompt" : "Hide the prompt";
+    $("qHide").title = a.hideExam ? "Show the exam's prompt and questions again" : "Fold the exam's prompt and questions away (they're kept)";
     drawQTally();
   }
   function drawQTally() {
     var qs = cur.questions, n = qs.filter(function (q) { return q.type !== "info"; }).length, pts = qs.reduce(function (t, q) { return t + (q.type === "info" ? 0 : Number(q.points) || 0); }, 0);
     $("qTally").textContent = n ? n + (n === 1 ? " question" : " questions") + " · " + pts + (pts === 1 ? " point" : " points") : "";
   }
+  $("qHide").addEventListener("click", function () { if (!cur) return; cur.hideExam = !cur.hideExam; save(); drawQuestions(); });
   $("qAdd").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-q]"); if (!b || !cur) return;
     cur.questions.push(newQuestion(b.dataset.q)); save(); drawQuestions();
@@ -1680,8 +1797,17 @@ function examNetBuilder() {
     var p = examProblems(cur), r = $("enResult");
     if (p.length) { r.hidden = false; r.className = "tally warn"; r.textContent = p.join(" "); return; }
     db.builderV = db.builderV || BUILDER_V; save();
-    window.open("https://exam.net/admin/exams#tcbuild=" + btoa(unescape(encodeURIComponent(JSON.stringify(enSpec(cur))))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""), "examnetBuild");
+    openExamNet(enSpec(cur));
     r.hidden = false; r.className = "tally"; r.textContent = "Waiting for the Testing Center Builder in the Exam.net tab…";
+  });
+  function openExamNet(spec) { return window.open("https://exam.net/admin/exams#tcbuild=" + btoa(unescape(encodeURIComponent(JSON.stringify(spec)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""), "examnetBuild"); }
+  // Only read the keys of exams that are already there.
+  $("enGetKeys").addEventListener("click", function () {
+    var a = cur, names = a.enMode === "build" ? enClassNames(a) : [srcName(a)].filter(Boolean);
+    if (!names.length) { $("enBuilt").textContent = "Give the assessment a name first: it's how the exams are found."; return; }
+    if (db.builderV !== BUILDER_V) { $("enBuild").click(); $("enResult").hidden = false; $("enResult").className = "tally warn"; $("enResult").textContent = "Drag Testing Center Builder to your bookmarks bar first (above), then close this and click Get the exam keys from Exam.net again."; return; }
+    openExamNet({ v: BUILDER_V, from: location.origin, aid: a.id, name: tcName(a), keys: { names: names } });
+    $("enBuilt").textContent = "On the Exam.net tab, click Testing Center Builder in your bookmarks bar.";
   });
   function markBuilt(a, key, name) {
     a.enKey = key || a.enKey; if (name) a.enName = name;
@@ -1694,15 +1820,28 @@ function examNetBuilder() {
     save();
   }
   window.addEventListener("message", function (e) {
-    if (e.origin !== "https://exam.net" || !e.data || e.data.type !== "tcbuild-done") return;
+    if (e.origin !== "https://exam.net" || !e.data) return;
     var a = db.exams.find(function (x) { return x.id === e.data.aid; }); if (!a) return;
+    if (e.data.type === "tcbuild-keys") {
+      if (e.data.classExams && e.data.classExams.length) a.enClassBuilt = e.data.classExams;
+      if (e.data.tc) { a.enKey = e.data.tc.key; a.enName = e.data.tc.name; a.enTcId = e.data.tc.id; }
+      save();
+      if (cur === a) {
+        $("enKey").value = a.enKey || ""; $("enName").value = a.enName || "";
+        drawEnMode(); drawStudents(); drawPreview();
+        $("enBuilt").textContent = "Keys read from Exam.net" + (e.data.tc ? "" : " (no Testing Center copy found there yet)") + ".";
+      } else drawHome();
+      return;
+    }
+    if (e.data.type !== "tcbuild-done") return;
     markBuilt(a, e.data.key, e.data.name);
+    if (e.data.examId) a.enTcId = e.data.examId;
     if (e.data.classExams) a.enClassBuilt = e.data.classExams;
     db.enDefaults = Object.assign({}, enSetOf(a));
     if (a.enMode === "build") db.classDefaults = Object.assign({}, classSetOf(a));
     save();
     if (cur === a) {
-      drawEnMode();
+      drawEnMode(); drawStudents();
       $("enBuilt").textContent = "Built: " + e.data.name + " · " + e.data.key;
       var r = $("enResult"); r.hidden = false;
       r.className = "tally " + (e.data.problems && e.data.problems.length ? "warn" : "ok");
