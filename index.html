@@ -108,6 +108,11 @@
   .srow .sched .what .ln.warn { color: var(--attn); }
   .srow .sched .what .key { font-weight: 400; color: var(--ink-soft); white-space: nowrap; }
   .srow .sched .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .srow .sched .req { flex: 1 1 100%; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--attn-soft); color: var(--attn); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-weight: 600; }
+  .srow .sched .req .sp { flex: 1; min-width: 160px; }
+  .srow .sched .req.quiet { background: none; color: var(--ink-soft); font-weight: 400; padding: 0; }
+  #mkPanel { display: flex; flex-direction: column; gap: 8px; }
+  #mkPanel .sit { margin: 0; }
   .srow .cls { display: flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
   .srow .cls input { width: 134px; padding: 5px 4px; }
   .srow .cls select { width: 56px; padding: 5px 4px; }
@@ -264,6 +269,7 @@
       <button class="btn" id="printComing" type="button">Print this list</button>
     </div>
   </div>
+  <div class="panel" id="mkPanel"></div>
   <div id="comingList"></div>
 </main>
 
@@ -423,6 +429,34 @@
     </div>
     <p class="hint" style="margin:6px 0 0">A line can name its own period instead (e.g. <span class="num">Ari B., 2x, D period</span>).</p>
     <div class="modal-actions"><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" id="pasteAdd" type="button">Add them</button></div>
+  </div>
+</dialog>
+
+<!-- Make-up requests: setting up the form -->
+<dialog class="modal" id="mkBox">
+  <div class="modal-inner">
+    <div class="modal-head"><h2>Students Pick Their Own Make-Up Time</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
+    <p class="note" style="margin:0 0 10px">A Google Form on your school account asks a student for a day and a period. Their answer shows on their row here, and you decide whether to use it. Set up once:</p>
+    <ol class="en-steps" style="margin-top:0">
+      <li><b>1</b>&nbsp; Make a Google Form with short-answer questions <b>Student</b>, <b>Assessment</b> and <b>Request code</b>, a date question <b>Day</b>, a dropdown <b>Period</b> (A to H) and an optional <b>Note</b>. Collect email addresses and keep it to Horace Mann accounts.</li>
+      <li><b>2</b>&nbsp; In the form's ⋮ menu choose <b>Pre-fill form</b>, type NAME, EXAM and CODE into the first three questions, click <b>Get link</b> and paste that link below.</li>
+      <li><b>3</b>&nbsp; In Responses, <b>Link to Sheets</b>. In the sheet: File › Share › <b>Publish to web</b> › the responses tab as <b>Comma-separated values (.csv)</b>, and paste that link below.</li>
+    </ol>
+    <div class="field" style="margin-top:12px"><label for="mkPrefill">The form's pre-filled link (with NAME, EXAM and CODE in it)</label><input id="mkPrefill" placeholder="https://docs.google.com/forms/d/e/…/viewform?usp=pp_url&entry…"></div>
+    <div class="field" style="margin-top:10px"><label for="mkCsv">The response sheet's published link (.csv)</label><input id="mkCsv" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv"></div>
+    <p class="hint" style="margin:8px 0 0">Both are kept in this browser only. Anyone with the published link could read the sheet (names, assessments and the times picked), so don't pass it on.</p>
+    <div class="tally warn" id="mkNote" hidden></div>
+    <div class="modal-actions"><button class="btn" type="button" data-close>Cancel</button><button class="btn btn-primary" id="mkSave" type="button">Save</button></div>
+  </div>
+</dialog>
+
+<!-- Make-up requests: asking one student -->
+<dialog class="modal" id="askBox">
+  <div class="modal-inner">
+    <div class="modal-head"><h2 id="askTitle">Ask to Pick a Make-Up Time</h2><button class="xbtn" type="button" data-close aria-label="Close">✕</button></div>
+    <p class="note" style="margin:0 0 10px">Send this to the student however you usually write to them. The link opens the form with their name and the assessment filled in; they pick a day and a period, and it shows on their row here.</p>
+    <textarea id="askText" rows="6"></textarea>
+    <div class="modal-actions"><button class="btn" type="button" data-close>Done</button><button class="btn" id="askCopyLink" type="button">Copy just the link</button><button class="btn btn-primary" id="askCopy" type="button">Copy the message</button></div>
   </div>
 </dialog>
 
@@ -935,6 +969,68 @@ function examNetBuilder() {
   }
   function allSittings(a) { var out = []; a.students.forEach(function (s) { out = out.concat(sittings(a, s)); }); return out; }
 
+  // ---------------------------------------------------------------
+  // Make-up requests: a student picks a day and period on a Google Form
+  // (db.mk: its address, its three pre-filled questions' ids, and the
+  // response sheet's published .csv); the answers are read from the sheet
+  // and shown on the student's row. A request is found by its code
+  // (assessment id + "." + student id); the latest answer wins, and
+  // s.mkDone is the time stamp of the answer already used or ignored.
+  // ---------------------------------------------------------------
+  var mkReqs = db.mkReqs || {}, mkAt = 0, mkErr = "";
+  function mkCode(a, s) { return a.id + "." + s.id; }
+  function mkLink(a, s) {
+    var m = db.mk; if (!m || !m.formUrl) return "";
+    return m.formUrl + "?" + [["usp", "pp_url"], [m.ids.name, s.name.trim()], [m.ids.exam, (a.title || "").trim()], [m.ids.code, mkCode(a, s)]].filter(function (kv) { return kv[0] && kv[1]; })
+      .map(function (kv) { return encodeURIComponent(kv[0]) + "=" + encodeURIComponent(kv[1]); }).join("&");
+  }
+  function mkReq(a, s) { var r = mkReqs[mkCode(a, s)]; return r && r.day && r.ts !== s.mkDone ? r : null; }
+  function mkWaiting(a) { return a.students.filter(function (s) { return mkReq(a, s); }); }
+  function parseCsv(text) {
+    var rows = [], row = [], cell = "", q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charAt(i);
+      if (q) { if (c === '"') { if (text.charAt(i + 1) === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+      else if (c === '"') q = true;
+      else if (c === ",") { row.push(cell); cell = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && text.charAt(i + 1) === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  function mkDay(v) {
+    v = String(v || "").trim();
+    var m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (m) return m[1] + "-" + pad2(+m[2]) + "-" + pad2(+m[3]);
+    m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (m) return m[3] + "-" + pad2(+m[1]) + "-" + pad2(+m[2]);
+    return "";
+  }
+  async function mkFetch(force) {
+    var m = db.mk; if (!m || !m.csv) return;
+    if (!force && Date.now() - mkAt < 60000) return;
+    mkAt = Date.now();
+    var before = JSON.stringify(mkReqs) + mkErr;
+    try {
+      var r = await fetch(m.csv + (m.csv.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) throw new Error("status " + r.status);
+      var rows = parseCsv(await r.text()), head = (rows[0] || []).map(function (h) { return h.toLowerCase(); });
+      function col(re) { return head.findIndex(function (h) { return re.test(h); }); }
+      var c = { ts: col(/timestamp/), email: col(/email/), code: col(/code/), day: col(/\bday\b|date/), period: col(/period/), note: col(/note/) };
+      if (c.code < 0 || c.day < 0 || c.period < 0) throw new Error("columns");
+      var out = {};
+      rows.slice(1).forEach(function (row) {
+        var code = (row[c.code] || "").trim(); if (!code) return;
+        var per = ((row[c.period] || "").match(/^\s*([A-H])\b/i) || [])[1];
+        out[code] = { ts: (row[c.ts < 0 ? 0 : c.ts] || "").trim(), email: c.email < 0 ? "" : (row[c.email] || "").trim(), day: mkDay(row[c.day]), period: per ? per.toUpperCase() : "", note: c.note < 0 ? "" : (row[c.note] || "").trim() };
+      });
+      mkReqs = db.mkReqs = out; mkErr = ""; save();
+    } catch (e) { mkErr = e.message === "columns" ? "The response sheet has no Request code, Day and Period columns: check the form's questions." : "Couldn't read the make-up form's answers (is the sheet still published?)."; }
+    if (JSON.stringify(mkReqs) + mkErr === before && !force) return;
+    if (!$("comingPage").hidden) drawComing();
+    else if (!$("homePage").hidden) drawHome();
+    else if (cur && !$("studentRows").contains(document.activeElement) && !$("schedBox").open) drawStudents();
+  }
+
   function remember(s) {
     var k = s.name.trim().toLowerCase();
     if (k) { db.roster[k] = { grade: s.grade, extra: s.extra, period: s.classPeriod }; }
@@ -955,12 +1051,14 @@ function examNetBuilder() {
     var h = location.hash.slice(1);
     if (h.indexOf("exam/") === 0) {
       var a = db.exams.find(function (x) { return x.id === h.slice(5); });
-      if (a) { openExam(a); return; }
+      if (a) { openExam(a); mkFetch(); return; }
     }
+    mkFetch();
     if (h === "comingup") { drawComing(); show("coming"); return; }
     cur = null; drawHome(); show("home");
   }
   window.addEventListener("hashchange", route);
+  window.addEventListener("focus", function () { mkFetch(); });
   $("homeLink").addEventListener("click", function () { location.hash = ""; });
   $("tabs").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
@@ -996,7 +1094,8 @@ function examNetBuilder() {
       var o = document.createElement("button"); o.type = "button"; o.className = "open"; o.title = "Open this assessment";
       var sits = allSittings(a), uns = sits.filter(function (x) { return x.unscheduled; }).length;
       o.innerHTML = '<span class="t">' + esc(a.title || "Untitled assessment") + '</span><span class="m">' + esc([a.subject, examWhen(a)].filter(Boolean).join(" · ")) + '</span>' +
-        '<span>' + (sits.length ? '<span class="pill ' + (uns ? "warn" : "ok") + '">' + (uns ? uns + " to schedule" : sits.length + (sits.length === 1 ? " sitting" : " sittings") + " scheduled") + '</span> ' : '<span class="pill">No one in the Testing Center</span> ') + '</span>';
+        '<span>' + (sits.length ? '<span class="pill ' + (uns ? "warn" : "ok") + '">' + (uns ? uns + " to schedule" : sits.length + (sits.length === 1 ? " sitting" : " sittings") + " scheduled") + '</span> ' : '<span class="pill">No one in the Testing Center</span> ') +
+        (mkWaiting(a).length ? '<span class="pill warn">' + mkWaiting(a).length + (mkWaiting(a).length === 1 ? " make-up request" : " make-up requests") + '</span>' : "") + '</span>';
       o.addEventListener("click", function () { location.hash = "exam/" + a.id; });
       c.appendChild(o);
       if (a.examNet) c.appendChild(enCard(a));
@@ -1041,7 +1140,62 @@ function examNetBuilder() {
   }
 
   // Coming Up: every Testing Center sitting, by day.
+  function drawMkPanel() {
+    var box = $("mkPanel"), m = db.mk; box.innerHTML = "";
+    var t = document.createElement("div"); t.className = "panel-title"; t.style.margin = "0"; t.textContent = "Make-Up Requests";
+    var acts = document.createElement("span"); acts.style.cssText = "display:flex;gap:8px";
+    function b(text, title, fn) { var x = document.createElement("button"); x.type = "button"; x.className = "btn btn-sm"; x.textContent = text; x.title = title; x.addEventListener("click", fn); acts.appendChild(x); }
+    if (m && m.csv) b("Check now", "Reads the form's answers again", function () { mkFetch(true); });
+    b(m ? "Change the form…" : "Set up…", "The Google Form students pick their make-up time on", openMkSetup);
+    t.appendChild(acts); box.appendChild(t);
+    var n = document.createElement("div"); n.className = "note";
+    var wait = []; db.exams.forEach(function (a) { mkWaiting(a).forEach(function (s) { wait.push({ a: a, s: s, r: mkReq(a, s) }); }); });
+    n.textContent = !m ? "Students can pick their own make-up time on a Google Form, and it shows here and on their row. Not set up yet." : mkErr ? mkErr : wait.length ? "" : "No requests waiting. Ask a student from their row: Make-up, then Ask to pick a time.";
+    if (mkErr) n.style.color = "var(--attn)";
+    if (n.textContent) box.appendChild(n);
+    wait.forEach(function (w) {
+      var r = document.createElement("div"); r.className = "sit";
+      r.innerHTML = '<span class="tm">' + esc(shortDay(w.r.day)) + "<br>" + esc(periodName(w.r.period || "?")) + '</span><span class="who">' + esc(w.s.name || "Unnamed student") + " <span>· " + esc(w.a.title || "Untitled assessment") + (w.r.note ? " · “" + esc(w.r.note) + "”" : "") + '</span></span><span class="pill warn">Asked for</span>';
+      r.title = "Open the assessment to use or ignore this time";
+      r.addEventListener("click", function () { location.hash = "exam/" + w.a.id; });
+      box.appendChild(r);
+    });
+  }
+  function openMkSetup() {
+    var m = db.mk || {};
+    $("mkPrefill").value = m.prefill || ""; $("mkCsv").value = m.csv || ""; $("mkNote").hidden = true;
+    $("mkBox").showModal();
+  }
+  $("mkSave").addEventListener("click", function () {
+    var link = $("mkPrefill").value.trim(), csv = $("mkCsv").value.trim(), note = $("mkNote"), ids = {};
+    function bad(t) { note.hidden = false; note.textContent = t; }
+    if (!link && !csv) { delete db.mk; save(); $("mkBox").close(); drawMkPanel(); if (cur) drawStudents(); return; }
+    var q = link.split("?")[1] || "";
+    q.split("&").forEach(function (kv) { var p = kv.split("="), v = decodeURIComponent((p[1] || "").replace(/\+/g, " ")).trim().toUpperCase(); if (/^entry\./.test(p[0])) { if (v === "NAME") ids.name = p[0]; if (v === "EXAM") ids.exam = p[0]; if (v === "CODE") ids.code = p[0]; } });
+    if (!/^https:\/\/docs\.google\.com\/forms\//.test(link) || !ids.code || !ids.name) return bad("That isn't a pre-filled link with NAME, EXAM and CODE in it. In the form: ⋮ › Pre-fill form, type NAME, EXAM and CODE into the first three questions, then Get link.");
+    if (!/^https:\/\/docs\.google\.com\/spreadsheets\/.*output=csv/.test(csv)) return bad("The sheet's link should be its Publish to web link as .csv (it ends in output=csv).");
+    db.mk = { prefill: link, formUrl: link.split("?")[0], ids: ids, csv: csv }; save();
+    $("mkBox").close(); mkFetch(true); drawMkPanel(); if (cur) drawStudents();
+  });
+  var asking = null;
+  function openAsk(a, s) {
+    if (!db.mk) { openMkSetup(); return; }
+    asking = { a: a, s: s };
+    var first = s.name.trim().split(/\s+/)[0] || "";
+    $("askTitle").textContent = "Ask " + (s.name.trim() || "This Student") + " to Pick a Make-Up Time";
+    $("askText").value = (first ? "Hi " + first + ",\n\n" : "") + "Please pick a day and a period to make up " + ((a.title || "").trim() || "the assessment") + " in the Testing Center (" + needMin(a, s) + " minutes):\n\n" + mkLink(a, s) + "\n\nI'll confirm the time once I've seen it.";
+    $("askBox").showModal();
+  }
+  function askCopied(btn, text) {
+    try { navigator.clipboard.writeText(text); } catch (e) {}
+    var was = btn.textContent; btn.textContent = "Copied"; setTimeout(function () { btn.textContent = was; }, 1000);
+    if (asking) { asking.s.mkAsked = todayISO(); save(); if (cur === asking.a) drawStudents(); }
+  }
+  $("askCopy").addEventListener("click", function () { askCopied(this, $("askText").value); });
+  $("askCopyLink").addEventListener("click", function () { if (asking) askCopied(this, mkLink(asking.a, asking.s)); });
+
   function drawComing() {
+    drawMkPanel();
     var list = $("comingList"), past = $("showPast").checked, today = todayISO(), rows = [];
     db.exams.forEach(function (a) { allSittings(a).forEach(function (x) { if (!x.unscheduled && (past || x.date >= today)) rows.push(x); }); });
     rows.sort(function (x, y) { return x.date.localeCompare(y.date) || partStart(x.parts[0]) - partStart(y.parts[0]); });
@@ -1194,7 +1348,24 @@ function examNetBuilder() {
           if (mine.length === 1) { openForm(mine[0]); return; }
           formOnly = s.id; drawForms(); $("formBox").showModal();
         });
+        if (s.makeup) act("Ask to pick a time", "Gives you a link to send " + who + ": they pick a day and a period for their make-up, and it shows here", function () { openAsk(a, s); });
         sched.appendChild(acts);
+        var rq = mkReq(a, s);
+        if (rq) {
+          var line = document.createElement("div"); line.className = "req";
+          var sp = document.createElement("span"); sp.className = "sp";
+          sp.textContent = "Asked for " + shortDay(rq.day) + (rq.period ? " · " + periodName(rq.period) : "") + (rq.day < todayISO() ? " (already past)" : holiday(rq.day) ? " (" + holiday(rq.day) + "?)" : "") + (rq.note ? " · “" + rq.note + "”" : "");
+          sp.title = "Picked on the make-up form" + (rq.email ? " by " + rq.email : "") + (rq.ts ? ", " + rq.ts : "");
+          line.appendChild(sp);
+          var use = document.createElement("button"); use.type = "button"; use.className = "btn btn-sm btn-primary"; use.textContent = "Use this time"; use.title = "Opens their Testing Center time starting then, for you to check and save";
+          use.addEventListener("click", function () { openSched(s, rq); });
+          var ign = document.createElement("button"); ign.type = "button"; ign.className = "btn btn-sm"; ign.textContent = "Ignore"; ign.title = "Takes this request off the row (their schedule isn't changed)";
+          ign.addEventListener("click", function () { s.mkDone = rq.ts; save(); drawStudents(); });
+          line.appendChild(use); line.appendChild(ign); sched.appendChild(line);
+        } else if (s.makeup && s.mkAsked && sits[0].unscheduled) {
+          var q2 = document.createElement("div"); q2.className = "req quiet"; q2.textContent = "Asked to pick a time on " + shortDay(s.mkAsked) + ". Nothing picked yet.";
+          sched.appendChild(q2);
+        }
       }
       fillSched();
       var x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.title = "Remove this student from this assessment";
@@ -1232,21 +1403,23 @@ function examNetBuilder() {
   // each part a period, its first or second half, or so many minutes).
   // ---------------------------------------------------------------
   var editing = null;
-  function openSched(s) {
-    editing = { s: s, parts: s.parts.map(function (p) { return Object.assign({}, p); }), withClass: s.withClass !== false };
-    if (!editing.parts.length) fillRest();
+  function openSched(s, req) {
+    editing = { s: s, parts: req ? [] : s.parts.map(function (p) { return Object.assign({}, p); }), withClass: s.withClass !== false, req: req || null };
+    if (req) fillRest({ date: req.day, period: req.period });
+    else if (!editing.parts.length) fillRest();
     $("schedNotes").value = s.notes || "";
     drawSched(); $("schedBox").showModal();
   }
   function edMin() { var a = cur, s = editing.s; return (!s.makeup && editing.withClass && s.classDate ? classMin(a, s) : 0) + editing.parts.reduce(function (t, p) { return t + partMin(p); }, 0); }
   // The rest of their time: right after the class (the next period that day),
   // or for a make-up the class's own period on the next school day.
-  function fillRest() {
+  function fillRest(from) {
     var a = cur, s = editing.s, left = needMin(a, s) - edMin();
     if (left <= 0) return;
     var last = sortedParts({ parts: editing.parts }).pop(), date, idx;
     var letters = PERIODS.filter(function (p) { return p.id.length === 1; });
-    if (last) { date = last.date; idx = letters.findIndex(function (p) { return p.id === last.period; }) + 1; }
+    if (from) { date = from.date; idx = Math.max(0, letters.findIndex(function (p) { return p.id === from.period; })); }
+    else if (last) { date = last.date; idx = letters.findIndex(function (p) { return p.id === last.period; }) + 1; }
     else if (!s.makeup && editing.withClass && s.classDate) { date = s.classDate; idx = letters.findIndex(function (p) { return p.id === s.classPeriod; }) + 1; }
     else if (!s.makeup && s.classDate && s.classDate >= todayISO()) { date = s.classDate; idx = Math.max(0, letters.findIndex(function (p) { return p.id === s.classPeriod; })); }
     else { date = s.classDate && s.classDate >= todayISO() ? nextSchoolDay(s.classDate) : nextSchoolDay(todayISO()); idx = Math.max(0, letters.findIndex(function (p) { return p.id === s.classPeriod; })); }
@@ -1324,6 +1497,7 @@ function examNetBuilder() {
     var s = editing.s;
     s.parts = editing.parts.filter(function (p) { return p.date && partMin(p) > 0; });
     s.withClass = editing.withClass; s.notes = $("schedNotes").value.trim();
+    if (editing.req) s.mkDone = editing.req.ts;
     editing = null; save(); $("schedBox").close(); drawStudents(); drawPreview();
   });
 
