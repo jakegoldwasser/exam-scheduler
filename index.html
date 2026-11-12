@@ -129,8 +129,8 @@
   .card .open { cursor: pointer; display: flex; flex-direction: column; gap: 4px; border: none; background: none; padding: 0; text-align: left; }
   .card .open:hover .t { color: var(--maroon); }
   .card .en { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12.5px; display: flex; flex-direction: column; gap: 3px; }
-  .card .en .k { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-  .card .en .k .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); }
+  .card .en .k { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .card .en .k .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); }
   .card .en .k .num { font-weight: 600; cursor: pointer; }
   .card .en .links { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
   .card .en a.btn { text-decoration: none; }
@@ -473,7 +473,7 @@
    Exam Scheduler tab (postMessage). No comments of the // kind in here:
    it becomes a javascript: URL. */
 function examNetBuilder() {
-  var V = 3, OK_FROM = ["https://jakegoldwasser.github.io", "http://localhost:8765"];
+  var V = 4, OK_FROM = ["https://jakegoldwasser.github.io", "http://localhost:8765"];
   var old = document.getElementById("tcb-panel"); if (old) old.remove();
   var P = document.createElement("div"); P.id = "tcb-panel";
   P.style.cssText = "position:fixed;top:14px;right:14px;z-index:2147483647;width:410px;max-height:92vh;overflow:auto;background:#fff;color:#1c1b19;border:2px solid #7A1F2E;border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.32);font:14px/1.45 -apple-system,Helvetica,Arial,sans-serif;padding:16px 18px;text-align:left";
@@ -486,6 +486,76 @@ function examNetBuilder() {
   try { var m = location.hash.match(/tcbuild=([A-Za-z0-9_-]+)/); if (m) spec = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); } catch (e) {}
   head("Testing Center Builder");
   if (location.hostname !== "exam.net") { say("Use this on Exam.net: open it from the Exam Scheduler's Build it in Exam.net, then click Testing Center Builder on that tab."); return; }
+  if (/^\/admin\/exams\/\d+/.test(location.pathname)) { exportPapers(); return; }
+  /* On an exam's Monitoring / Results page: send the class's submitted
+     answers to Luddite, where they land in Bring In Exam.net Papers. The
+     page's own store has each student and a pass (jwt) for their answer. */
+  function exportPapers() {
+    var S = null;
+    try { S = document.querySelector("#app").__vue_app__.config.globalProperties.$pinia.state.value.examStudents.students; } catch (e) {}
+    var title = (document.title || "").replace(/ - Exam\.net$/, "").trim();
+    head("Send to Luddite");
+    if (!S) { say("Couldn't read this exam's students. Reload the page, wait for the list of students, then click Testing Center Builder again."); return; }
+    var done = S.filter(function (s) { return String(s.is_handed_in) === "1"; });
+    say("“" + title + "”", "font-weight:600");
+    var keyBtn = btn("Send individual exam keys to the Exam Scheduler", false, function () {
+      var examKey = ""; try { examKey = ((document.body.innerText.match(/Exam key\s+([A-Za-z0-9]{6})\b/) || [])[1]) || ""; } catch (e) {}
+      if (!examKey) { say("Couldn't find this exam's key on the page. Open Monitoring (not Results), then click Testing Center Builder again.", "color:#93630F"); return; }
+      var origin = OK_FROM[0], w = window.open(origin + "/exam-scheduler/#examnet-keys", "examSchedulerKeys"), sentK = false;
+      head("Individual Exam Keys");
+      var n2 = say(w ? "Waiting for the Exam Scheduler to open…" : "Chrome stopped the Exam Scheduler opening. Allow pop-ups for exam.net, then click Testing Center Builder again.", w ? "" : "color:#93630F");
+      if (!w) return;
+      window.addEventListener("message", function (e) {
+        if (e.origin !== origin || !e.data || e.data.type !== "scheduler-ready" || sentK) return;
+        sentK = true;
+        w.postMessage({ type: "tcbuild-pins", exam: title, examKey: examKey, students: S.filter(function (s) { return s.resume_pin; }).map(function (s) { return { name: ((s.firstName || "") + " " + (s.lastName || "")).trim(), email: s.email || "", key: examKey + "#" + s.resume_pin }; }) }, origin);
+        n2.textContent = "Sent: each student's individual key is on their row in the Exam Scheduler."; n2.style.color = "#2F6B3A";
+        P.appendChild(btn("Done", true, function () { P.remove(); }));
+      });
+    });
+    say(done.length + (done.length === 1 ? " student has" : " students have") + " submitted" + (S.length - done.length ? "; " + (S.length - done.length) + " haven't and will be left out" : "") + ".");
+    if (!done.length) { if (S.length) P.appendChild(keyBtn); return; }
+    say("Their answers open in Luddite's Bring In Exam.net Papers, where you choose the class and check who wrote each before anything is saved.", "font-size:13px;color:#57534A");
+    var last = ""; try { last = localStorage.getItem("tcbLuddite") || ""; } catch (e) {}
+    var HM = ["https://jakegoldwasser-hm.github.io", "/luddite-hm/", "Luddite HM"], LU = ["https://jake-goldwasser.com", "/luddite/", "Luddite"];
+    (last === LU[2] ? [LU, HM] : [HM, LU]).forEach(function (t, i) { P.appendChild(btn("Send to " + t[2], i === 0, function () { send(t); })); });
+    P.appendChild(el("div", "border-top:1px solid #DBD6C9;margin-top:12px"));
+    P.appendChild(keyBtn);
+    function send(t) {
+      try { localStorage.setItem("tcbLuddite", t[2]); } catch (e) {}
+      var w = window.open(t[0] + t[1] + "#examnet", "ludditeImport"), papers = null, ready = false, sent = false;
+      head("Send to " + t[2]);
+      var note = say(w ? "Reading the answers…" : "Chrome stopped " + t[2] + " opening. Allow pop-ups for exam.net (the icon at the right end of the address bar), then click Testing Center Builder again.", w ? "" : "color:#93630F");
+      if (!w) return;
+      function go() {
+        if (!papers || !ready || sent) return;
+        sent = true;
+        w.postMessage({ type: "examnet-papers", exam: title, papers: papers }, t[0]);
+        note.textContent = papers.length + (papers.length === 1 ? " paper is" : " papers are") + " in " + t[2] + " now: finish there (choose the class, check the names, Bring in).";
+        note.style.color = "#2F6B3A";
+        P.appendChild(btn("Done", true, function () { P.remove(); }));
+      }
+      window.addEventListener("message", function (e) { if (e.origin === t[0] && e.data && e.data.type === "luddite-ready") { ready = true; go(); } });
+      (async function () {
+        var out = [], missed = 0;
+        for (var i = 0; i < done.length; i++) {
+          note.textContent = "Reading " + (i + 1) + " of " + done.length + "…";
+          var s = done[i], a = "";
+          try {
+            var r = await fetch("/api/new-faster/result/octane", { method: "POST", credentials: "same-origin", headers: { "Accept": "application/json", "Authorization": "Bearer " + s.jwt, "X-XSRF-TOKEN": decodeURIComponent((document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1] || "") } });
+            a = ((await r.json()).student || {}).answer || "";
+          } catch (e) { missed++; }
+          var answers = [a];
+          if (/^\s*\{/.test(a)) { try { var j = JSON.parse(a); if (j && j.answers) answers = Object.keys(j.answers).sort(function (x, y) { return Number(x) - Number(y); }).map(function (k) { var v = j.answers[k]; return (Array.isArray(v) ? v : [v]).map(function (x) { return x == null ? "" : String(x); }).join("<br>"); }); } catch (e) {} }
+          out.push({ name: ((s.firstName || "") + " " + (s.lastName || "")).trim(), email: s.email || "", answers: answers });
+        }
+        papers = out;
+        if (missed) say(missed + (missed === 1 ? " answer" : " answers") + " couldn't be read and will show as empty.", "color:#93630F");
+        if (!ready) note.textContent = "Waiting for " + t[2] + " to open (sign in there if it asks)…";
+        go();
+      })();
+    }
+  }
   if (!spec) { say("Nothing to build here. In the Exam Scheduler, open the assessment, click Build it in Exam.net…, then Open Exam.net, and click Testing Center Builder on the tab it opens."); return; }
   if (spec.v !== V) { say("This bookmark is out of date. In the Exam Scheduler's Build it in Exam.net…, drag Testing Center Builder to your bookmarks bar again.", "color:#93630F"); return; }
   if (location.pathname !== "/admin/exams") { say("Go to your exam list (Exams), then click Testing Center Builder again."); P.appendChild(btn("Go to my exams", true, function () { location.href = "/admin/exams" + location.hash; })); return; }
@@ -860,6 +930,7 @@ function examNetBuilder() {
       sits.forEach(function (x) { out.push({ text: shortDay(x.date) + " · " + x.parts.map(function (p) { return periodName(p.period); }).join(" + ") + ", in the Testing Center (" + x.mins + " min)", key: tk }); });
       if (short > 0) out.push({ text: short + " min still to schedule", warn: true });
     }
+    if (a.examNet && s.indKey) out.push({ text: "To resume “" + (s.indKeyExam || "the exam") + "” in a later sitting", key: s.indKey, ind: true });
     return out;
   }
   function allSittings(a) { var out = []; a.students.forEach(function (s) { out = out.concat(sittings(a, s)); }); return out; }
@@ -954,11 +1025,16 @@ function examNetBuilder() {
         k.addEventListener("click", function () { try { navigator.clipboard.writeText(x.key); k.textContent = "Copied"; setTimeout(function () { k.textContent = x.key; }, 900); } catch (e) {} });
         r.appendChild(k);
       } else r.insertAdjacentHTML("beforeend", '<span class="hint">no key yet</span>');
+      if (x.id) {
+        var mon = document.createElement("a"); mon.className = "btn btn-sm"; mon.textContent = "Monitor"; mon.href = "https://exam.net/admin/exams/" + x.id; mon.target = "_blank"; mon.rel = "noopener";
+        mon.title = "Opens “" + x.name + "” in Exam.net's Monitoring / Results. Click Testing Center Builder there to send its papers to Luddite.";
+        r.appendChild(mon);
+      }
       d.appendChild(r);
     });
     var links = document.createElement("div"); links.className = "links";
     function link(text, href, title) { var l = document.createElement("a"); l.className = "btn btn-sm"; l.textContent = text; l.href = href; l.target = "_blank"; l.rel = "noopener"; l.title = title; links.appendChild(l); }
-    link("Exams and monitoring", "https://exam.net/admin/exams", "Opens your exam list in Exam.net: each exam's row there has Monitor, Results and Share");
+    link("All exams", "https://exam.net/admin/exams", "Opens your exam list in Exam.net");
     if (first) link("Edit the exam", "https://exam.net/admin/exam-creator/" + first.id + "/edit", "Opens “" + first.name + "” in Exam.net's editor");
     d.appendChild(links);
     return d;
@@ -1104,7 +1180,7 @@ function examNetBuilder() {
         sched.innerHTML = "";
         var what = document.createElement("span"); what.className = "what";
         what.innerHTML = '<span class="lbl">When this student takes it</span>' + takes(a, s).map(function (l) {
-          return '<span class="ln' + (l.warn ? " warn" : "") + '">' + esc(l.text) + (l.key ? ' <span class="key">· exam key <span class="num">' + esc(l.key) + "</span></span>" : "") + "</span>";
+          return '<span class="ln' + (l.warn ? " warn" : "") + '">' + esc(l.text) + (l.key ? ' <span class="key">· ' + (l.ind ? "individual key" : "exam key") + ' <span class="num">' + esc(l.key) + "</span></span>" : "") + "</span>";
         }).join("");
         sched.appendChild(what);
         if (!needsTC(a, s)) return;
@@ -1502,7 +1578,7 @@ function examNetBuilder() {
       ["screenMonitoring", "Screen monitoring", ONOFF]]]
   ];
   var REQS = [["firstName", "First name"], ["lastName", "Last name"], ["email", "Email"], ["class", "Class"], ["teacher", "Teacher name"], ["phone", "Phone number"], ["studentId", "Student number"]];
-  var BUILDER_V = 3;
+  var BUILDER_V = 4;
   function enSetOf(a) { if (!a.enSet) a.enSet = Object.assign({ timeLimit: "off", lockdown: "high" }, db.enDefaults || {}); return a.enSet; }
   function classSetOf(a) { if (!a.classSet) a.classSet = Object.assign({}, db.classDefaults || {}); return a.classSet; }
   // Draws ENSET into box. kind "tc": blank = as in the class's exam;
@@ -1849,6 +1925,34 @@ function examNetBuilder() {
         "Testing Center copy: “" + e.data.name + "”, exam key " + e.data.key + "." + (e.data.problems && e.data.problems.length ? " Check in Exam.net: " + e.data.problems.join("; ") + "." : "");
     }
   });
+  // Each student's individual exam key (Exam.net's key to resume an exam in
+  // a later sitting: "examkey#123456", single use), sent by the bookmark from
+  // the exam's Monitoring page to this page opened at #examnet-keys.
+  function nameToks(n) { return String(n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z ]+/g, " ").split(" ").filter(Boolean); }
+  function sameStudent(a, b) {
+    var x = nameToks(a), y = nameToks(b);
+    if (!x.length || !y.length || x[0] !== y[0]) return false;
+    if (x.length === 1 || y.length === 1) return x.length === y.length;
+    var lx = x[x.length - 1], ly = y[y.length - 1];
+    return lx === ly || (lx.length === 1 && ly.charAt(0) === lx) || (ly.length === 1 && lx.charAt(0) === ly);
+  }
+  window.addEventListener("message", function (e) {
+    if (e.origin !== "https://exam.net" || !e.data || e.data.type !== "tcbuild-pins" || !Array.isArray(e.data.students)) return;
+    var d = e.data, nm = String(d.exam || "").trim().toLowerCase();
+    var a = db.exams.find(function (a) { return a.examNet && enExams(a).some(function (x) { return (x.name || "").trim().toLowerCase() === nm || (x.key && x.key === d.examKey); }); }) ||
+      db.exams.find(function (a) { return (a.title || "").trim() && nm.indexOf(a.title.trim().toLowerCase()) === 0; });
+    if (!a) { alert("No assessment here matches “" + d.exam + "”. Give the assessment the exam's name in Exam.net (or type its exam key in), then send the keys again."); return; }
+    var hit = 0;
+    a.students.forEach(function (s) {
+      var m = d.students.filter(function (x) { return sameStudent(s.name, x.name); });
+      if (m.length === 1) { s.indKey = m[0].key; s.indKeyExam = d.exam; hit++; }
+    });
+    save();
+    if (cur === a) { drawStudents(); drawPreview(); } else location.hash = "exam/" + a.id;
+    setTimeout(function () { $("studentSummary").textContent = "Individual exam keys from “" + d.exam + "”: " + hit + " of " + a.students.length + " students matched by name"; }, 60);
+  });
+  if (window.opener && location.hash === "#examnet-keys") { try { window.opener.postMessage({ type: "scheduler-ready" }, "https://exam.net"); } catch (e) {} }
+
   $("enKey2").addEventListener("input", function () {
     if (!cur) return;
     var k = this.value.trim();
